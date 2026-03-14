@@ -1,0 +1,72 @@
+[build-system]
+requires      = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# ─────────────────────────────────────────────────────────────
+# Project metadata
+# ─────────────────────────────────────────────────────────────
+[project]
+name            = "todoc"
+version         = "0.1.0"
+description     = "The most powerful terminal task manager"
+authors         = [{ name = "Your Name", email = "you@example.com" }]
+license         = { text = "MIT" }
+requires-python = ">=3.10"
+
+# This wires README.md into the PyPI page
+readme = { file = "README.md", content-type = "text/markdown" }
+
+keywords = [
+    "todo", "task", "cli", "terminal", "productivity",
+    "task-manager", "typer", "rich",
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Scheduling",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "typer>=0.12",
+    "rich>=13",
+]
+
+# ─────────────────────────────────────────────────────────────
+# Entry point — makes `todoc` available as a shell command
+# ─────────────────────────────────────────────────────────────
+[project.scripts]
+todoc = "todoc.cli.main:app"
+
+# ─────────────────────────────────────────────────────────────
+# Optional: project URLs shown on the PyPI sidebar
+# ─────────────────────────────────────────────────────────────
+[project.urls]
+Homepage      = "https://github.com/anikchand461/todoc"
+Repository    = "https://github.com/anikchand461/todoc"
+"Bug Tracker" = "https://github.com/anikchand461/todoc/issues"
+
+# ─────────────────────────────────────────────────────────────
+# Package discovery
+# ─────────────────────────────────────────────────────────────
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["todoc*"]
+
+# ─────────────────────────────────────────────────────────────
+# Dev / test extras  (pip install todoc[dev])
+# ─────────────────────────────────────────────────────────────
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov",
+]

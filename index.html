@@ -1,0 +1,2156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>todoc — terminal task manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Familjen+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --ink: #0c0c0b;
+        --ink2: #1e1e1c;
+        --ink3: #2e2e2b;
+        --paper: #faf8f4;
+        --paper2: #f2efe8;
+        --paper3: #e8e4d9;
+        --amber: #c97b2a;
+        --amber-light: #fdf0df;
+        --amber-border: #e8c48a;
+        --amber-pale: #fef8ed;
+        --rule: #d4d0c5;
+        --rule2: #e4e0d5;
+        --muted: #7a7868;
+        --muted2: #9a9887;
+        --serif: "DM Serif Display", serif;
+        --grotesk: "Familjen Grotesk", sans-serif;
+        --mono: "DM Mono", monospace;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--grotesk);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 0 40px;
+      }
+      @media (max-width: 700px) {
+        .wrap {
+          padding: 0 20px;
+        }
+      }
+
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--paper);
+        border-bottom: 1.5px solid var(--ink);
+      }
+      .nav-inner {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 0 40px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
+      .nav-mark {
+        width: 32px;
+        height: 32px;
+        background: var(--ink);
+        color: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-size: 15px;
+        font-weight: 500;
+      }
+      .nav-name {
+        font-family: var(--grotesk);
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.12s;
+      }
+      .nav-links a:hover {
+        color: var(--ink);
+      }
+      .nav-cta {
+        background: var(--ink);
+        color: var(--paper);
+        font-family: var(--grotesk);
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        padding: 8px 20px;
+        text-decoration: none;
+        border: 1.5px solid var(--ink);
+        transition: background 0.12s;
+      }
+      .nav-cta:hover {
+        background: var(--ink3);
+      }
+      .nav-gh {
+        background: transparent;
+        color: var(--ink);
+        font-family: var(--grotesk);
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        padding: 8px 18px;
+        text-decoration: none;
+        border: 1.5px solid var(--rule);
+        transition:
+          border-color 0.12s,
+          color 0.12s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .nav-gh:hover {
+        border-color: var(--ink);
+      }
+      @media (max-width: 700px) {
+        .nav-links {
+          display: none;
+        }
+      }
+
+      #hero {
+        border-bottom: 1.5px solid var(--ink);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 88vh;
+      }
+      @media (max-width: 900px) {
+        #hero {
+          grid-template-columns: 1fr;
+          min-height: auto;
+        }
+        .hero-right {
+          display: none;
+        }
+      }
+      .hero-left {
+        padding: 72px 56px 64px 40px;
+        border-right: 1.5px solid var(--ink);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--amber-light);
+        border: 1px solid var(--amber-border);
+        color: var(--amber);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        padding: 5px 12px;
+        margin-bottom: 36px;
+        text-transform: uppercase;
+      }
+      .kicker-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--amber);
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .hero-h1 {
+        font-family: var(--serif);
+        font-size: clamp(48px, 6vw, 80px);
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin-bottom: 28px;
+      }
+      .hero-h1 em {
+        font-style: italic;
+        color: var(--amber);
+      }
+      .hero-desc {
+        font-size: 17px;
+        color: var(--muted);
+        line-height: 1.65;
+        max-width: 480px;
+        margin-bottom: 48px;
+      }
+      .hero-desc strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .btn-ink {
+        background: var(--ink);
+        color: var(--paper);
+        font-family: var(--grotesk);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 13px 28px;
+        text-decoration: none;
+        border: 1.5px solid var(--ink);
+        transition: background 0.12s;
+        display: inline-block;
+      }
+      .btn-ink:hover {
+        background: var(--ink3);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        font-family: var(--mono);
+        font-size: 13px;
+        padding: 12px 20px;
+        text-decoration: none;
+        border: 1.5px solid var(--rule);
+        transition: border-color 0.12s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-ghost:hover {
+        border-color: var(--ink);
+      }
+      .pip-row {
+        margin-top: 36px;
+        display: flex;
+        align-items: center;
+      }
+      .pip-label {
+        font-size: 12px;
+        color: var(--muted);
+        font-family: var(--mono);
+        padding: 10px 16px;
+        border: 1.5px solid var(--rule);
+        border-right: 0;
+        background: var(--paper2);
+        white-space: nowrap;
+      }
+      .pip-cmd {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink);
+        padding: 10px 18px;
+        border: 1.5px solid var(--rule);
+        border-right: 0;
+        background: white;
+        flex: 1;
+      }
+      .pip-copy {
+        background: var(--amber);
+        color: white;
+        font-family: var(--grotesk);
+        font-weight: 600;
+        font-size: 12px;
+        padding: 10px 16px;
+        border: 1.5px solid var(--amber);
+        cursor: pointer;
+        letter-spacing: 0.04em;
+        transition: background 0.12s;
+        white-space: nowrap;
+      }
+      .pip-copy:hover {
+        background: #a8611e;
+      }
+      .pip-copy.ok {
+        background: #2c7a2c;
+        border-color: #2c7a2c;
+      }
+
+      .hero-right {
+        background: var(--ink);
+        display: flex;
+        flex-direction: column;
+      }
+      .term-bar {
+        background: var(--ink2);
+        border-bottom: 1px solid var(--ink3);
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .td1 {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+      }
+      .td1.r {
+        background: #e05555;
+      }
+      .td1.y {
+        background: #d4a017;
+      }
+      .td1.g {
+        background: #4dab6e;
+      }
+      .tp2 {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: #4a5050;
+        margin-left: 8px;
+      }
+      .tp2 span {
+        color: #5a7a7a;
+      }
+      .term-body {
+        padding: 28px 28px 36px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.9;
+        flex: 1;
+      }
+      .tp {
+        color: #4dab6e;
+      }
+      .tc {
+        color: #e8e4d9;
+      }
+      .tf {
+        color: #5a7a6a;
+      }
+      .ta {
+        color: #d4a017;
+      }
+      .chip-c {
+        background: #c0392b;
+        color: #fff;
+        padding: 1px 6px;
+        font-size: 11px;
+      }
+      .chip-h {
+        background: #5a1a1a;
+        color: #ff9a9a;
+        padding: 1px 6px;
+        font-size: 11px;
+        border: 1px solid #8b2a2a;
+      }
+      .chip-m {
+        background: #3a2e00;
+        color: #d4a017;
+        padding: 1px 6px;
+        font-size: 11px;
+        border: 1px solid #5a4800;
+      }
+      .chip-l {
+        background: #0d2e1a;
+        color: #4dab6e;
+        padding: 1px 6px;
+        font-size: 11px;
+        border: 1px solid #1a5c3a;
+      }
+      .rl {
+        color: #2a4040;
+        margin: 6px 0;
+        font-size: 12px;
+      }
+
+      .stats-bar {
+        border-bottom: 1.5px solid var(--ink);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .sc {
+        padding: 28px 32px;
+        border-right: 1px solid var(--rule);
+      }
+      .sc:last-child {
+        border-right: none;
+      }
+      .sn {
+        font-family: var(--serif);
+        font-size: 42px;
+        color: var(--ink);
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .sn em {
+        font-style: italic;
+        color: var(--amber);
+      }
+      .sl {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      @media (max-width: 700px) {
+        .stats-bar {
+          grid-template-columns: 1fr 1fr;
+        }
+        .sc {
+          border-bottom: 1px solid var(--rule);
+        }
+      }
+
+      .sec {
+        padding: 88px 0;
+        border-bottom: 1.5px solid var(--rule2);
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted2);
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .sec-h {
+        font-family: var(--serif);
+        font-size: clamp(32px, 4vw, 52px);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin-bottom: 16px;
+      }
+      .sec-h em {
+        font-style: italic;
+        color: var(--amber);
+      }
+      .sec-sub {
+        font-size: 16px;
+        color: var(--muted);
+        max-width: 520px;
+        line-height: 1.65;
+      }
+
+      #demo .di {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        border: 1.5px solid var(--ink);
+        margin-top: 48px;
+      }
+      @media (max-width: 800px) {
+        #demo .di {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dnav {
+        border-right: 1.5px solid var(--ink);
+        display: flex;
+        flex-direction: column;
+      }
+      .dnav-t {
+        padding: 14px 20px;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted2);
+        font-weight: 600;
+        border-bottom: 1px solid var(--rule2);
+      }
+      .dtab {
+        padding: 13px 20px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--muted);
+        cursor: pointer;
+        border-bottom: 1px solid var(--rule2);
+        border-left: 3px solid transparent;
+        transition: all 0.12s;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .dtab:hover {
+        color: var(--ink);
+        background: var(--paper2);
+      }
+      .dtab.on {
+        color: var(--ink);
+        font-weight: 500;
+        background: var(--amber-pale);
+        border-left-color: var(--amber);
+      }
+      .dpane {
+        background: var(--ink);
+        min-height: 440px;
+        padding: 28px 32px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.9;
+      }
+      .scene {
+        display: none;
+      }
+      .scene.on {
+        display: block;
+      }
+      .dt {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 4px 0;
+      }
+      .dt th {
+        font-size: 11.5px;
+        color: #4a5a5a;
+        font-weight: 400;
+        padding: 5px 10px;
+        border-bottom: 1px solid #1e2828;
+        text-align: left;
+      }
+      .dt td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #161e1e;
+        font-size: 12.5px;
+        color: #c8d4d4;
+        vertical-align: middle;
+      }
+      .dt tr:last-child td {
+        border-bottom: none;
+      }
+      .dt tr.dn td {
+        color: #2e3e3e;
+        text-decoration: line-through;
+      }
+      .di2 {
+        color: #4ab8b8;
+        font-weight: 500;
+        width: 36px;
+      }
+      .di2.dim {
+        color: #2e3e3e;
+        font-weight: 400;
+      }
+      .pbw {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        font-size: 12.5px;
+        color: #2e4a4a;
+        margin-top: 4px;
+      }
+      .pbw .dn {
+        color: #4dab6e;
+        font-weight: 500;
+      }
+      .pbw .pn {
+        color: #d4a017;
+        font-weight: 500;
+      }
+      .pbw .pc {
+        color: #4ab8b8;
+        font-weight: 500;
+      }
+      .pbg {
+        color: #4dab6e;
+        letter-spacing: -1px;
+      }
+      .pbe {
+        color: #1e2828;
+        letter-spacing: -1px;
+      }
+      .pan {
+        border: 1px solid;
+        padding: 16px 20px;
+        margin: 6px 0;
+      }
+      .pan.ok {
+        border-color: #1a4a2a;
+      }
+      .pan.wa {
+        border-color: #4a3800;
+      }
+      .pan.inf {
+        border-color: #1a3a4a;
+      }
+      .pt {
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 10px;
+        letter-spacing: 0.03em;
+      }
+      .pan.ok .pt {
+        color: #4dab6e;
+      }
+      .pan.wa .pt {
+        color: #d4a017;
+      }
+      .pan.inf .pt {
+        color: #4ab8b8;
+      }
+      .pr {
+        display: flex;
+        gap: 10px;
+        font-size: 12.5px;
+        margin-top: 4px;
+      }
+      .pl {
+        color: #2e4040;
+        min-width: 76px;
+      }
+      .pv {
+        color: #c8d4d4;
+      }
+
+      #features .fg {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border: 1.5px solid var(--rule2);
+        margin-top: 48px;
+      }
+      @media (max-width: 900px) {
+        #features .fg {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 600px) {
+        #features .fg {
+          grid-template-columns: 1fr;
+        }
+      }
+      .fc {
+        padding: 36px 32px;
+        border: 0.5px solid var(--rule2);
+        transition: background 0.15s;
+        position: relative;
+      }
+      .fc:hover {
+        background: var(--amber-pale);
+      }
+      .fc::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 32px;
+        right: 32px;
+        height: 2px;
+        background: var(--amber);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.25s;
+      }
+      .fc:hover::after {
+        transform: scaleX(1);
+      }
+      .fn {
+        font-family: var(--serif);
+        font-size: 32px;
+        color: var(--paper3);
+        margin-bottom: 16px;
+      }
+      .ft {
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--ink);
+        margin-bottom: 10px;
+        letter-spacing: -0.01em;
+      }
+      .fd {
+        font-size: 13.5px;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+      .fd code {
+        color: var(--amber);
+        background: var(--amber-light);
+        padding: 1px 5px;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      #commands .cl {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 64px;
+        margin-top: 48px;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        #commands .cl {
+          grid-template-columns: 1fr;
+        }
+      }
+      .cg-lbl {
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted2);
+        font-weight: 600;
+        padding: 10px 0;
+        border-bottom: 1.5px solid var(--ink);
+        margin-bottom: 0;
+      }
+      .crow {
+        display: grid;
+        grid-template-columns: 88px 1fr;
+        padding: 11px 0;
+        border-bottom: 1px solid var(--rule2);
+        transition:
+          padding 0.1s,
+          background 0.1s;
+      }
+      .crow:hover {
+        background: var(--paper2);
+        padding-left: 8px;
+        padding-right: 8px;
+        margin: 0 -8px;
+      }
+      .cn {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--amber);
+        font-weight: 500;
+      }
+      .cd {
+        font-size: 13.5px;
+        color: var(--ink);
+      }
+      .cd.red {
+        color: #a32d2d;
+      }
+      .fb {
+        background: var(--paper2);
+        border: 1.5px solid var(--ink);
+        position: sticky;
+        top: 72px;
+      }
+      .fb-t {
+        padding: 14px 20px;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 600;
+        border-bottom: 1.5px solid var(--ink);
+      }
+      .fr {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        padding: 10px 20px;
+        border-bottom: 1px solid var(--rule2);
+      }
+      .fr:last-child {
+        border-bottom: none;
+      }
+      .fnm {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink3);
+        font-weight: 500;
+        min-width: 120px;
+      }
+      .fds {
+        font-size: 12.5px;
+        color: var(--muted);
+        flex: 1;
+      }
+      .fdf {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--amber);
+        white-space: nowrap;
+      }
+
+      #install .il2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border: 1.5px solid var(--ink);
+        margin-top: 48px;
+      }
+      @media (max-width: 900px) {
+        #install .il2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .inst-l {
+        padding: 48px 44px;
+        border-right: 1.5px solid var(--ink);
+      }
+      .ist {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      .is {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      .isn {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        background: var(--ink);
+        color: var(--paper);
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--grotesk);
+      }
+      .ist-t {
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--ink);
+        margin-bottom: 6px;
+      }
+      .ist-d {
+        font-size: 13.5px;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .cl2 {
+        background: var(--paper3);
+        border: 1px solid var(--rule);
+        padding: 10px 16px;
+        font-family: var(--mono);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 2px;
+      }
+      .cl2 .ps {
+        color: #2c7a2c;
+        font-weight: 500;
+      }
+      .inote {
+        margin-top: 32px;
+        padding: 18px 20px;
+        border: 1px solid var(--amber-border);
+        background: var(--amber-pale);
+        display: flex;
+        gap: 12px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .inote strong {
+        color: var(--amber);
+      }
+      .inst-r {
+        background: var(--ink);
+        padding: 36px 32px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.9;
+      }
+      .iln {
+        display: flex;
+        gap: 8px;
+      }
+      .iln .p {
+        color: #4dab6e;
+      }
+      .iln .c {
+        color: #e8e4d9;
+      }
+      .io {
+        font-size: 12px;
+        margin: 1px 0;
+      }
+      .io.ok {
+        color: #4dab6e;
+      }
+      .io.dim {
+        color: #2e4040;
+      }
+      .io.inf {
+        color: #4a6060;
+      }
+      .isp {
+        height: 10px;
+      }
+
+      footer {
+        background: var(--ink);
+        color: var(--paper);
+        border-top: 1.5px solid var(--ink);
+      }
+      .ft2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        border-bottom: 1px solid #1e2828;
+      }
+      .fce {
+        padding: 48px 40px;
+        border-right: 1px solid #1e2828;
+      }
+      .fce:last-child {
+        border-right: none;
+      }
+      .fce-lbl {
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #4a5a5a;
+        font-weight: 600;
+        margin-bottom: 20px;
+      }
+      .fce-t {
+        font-family: var(--serif);
+        font-size: 28px;
+        color: #e8e4d9;
+        margin-bottom: 8px;
+      }
+      .fce-s {
+        font-size: 13.5px;
+        color: #5a6868;
+        line-height: 1.6;
+      }
+      .fls {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .fls a {
+        color: #5a6868;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.12s;
+      }
+      .fls a:hover {
+        color: #e8e4d9;
+      }
+      .fcmd {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: #4a6060;
+        line-height: 2.2;
+      }
+      .fb2 {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 40px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .fbr {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .fbm {
+        width: 28px;
+        height: 28px;
+        background: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .fbn {
+        font-family: var(--grotesk);
+        font-weight: 700;
+        font-size: 16px;
+        color: #e8e4d9;
+      }
+      .fcp {
+        font-size: 12px;
+        color: #3a4848;
+      }
+      @media (max-width: 700px) {
+        .ft2 {
+          grid-template-columns: 1fr;
+        }
+        .fce {
+          border-right: none;
+          border-bottom: 1px solid #1e2828;
+          padding: 32px 24px;
+        }
+        .fb2 {
+          padding: 20px 24px;
+        }
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition:
+          opacity 0.65s ease,
+          transform 0.65s ease;
+      }
+      .reveal.vis {
+        opacity: 1;
+        transform: none;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-inner">
+        <a href="#" class="nav-brand"
+          ><div class="nav-mark">◈</div>
+          <span class="nav-name">todoc</span></a
+        >
+        <div class="nav-links">
+          <a href="#demo">Demo</a><a href="#features">Features</a>
+          <a href="#commands">Commands</a><a href="#install">Install</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <a
+            href="https://github.com/anikchand461/todoc"
+            target="_blank"
+            class="nav-gh"
+            ><svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+              /></svg
+            >GitHub ↗</a
+          >
+          <a
+            href="https://pypi.org/project/todoc/0.1.0/"
+            target="_blank"
+            class="nav-cta"
+            >PyPI ↗</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <section id="hero">
+      <div class="hero-left">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+          "
+        >
+          <div class="hero-kicker" style="margin-bottom: 0">
+            <span class="kicker-dot"></span>v0.1.0 · now on PyPI
+          </div>
+          <a
+            href="https://github.com/anikchand461/todoc"
+            target="_blank"
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              font-size: 12px;
+              font-weight: 600;
+              color: var(--ink);
+              text-decoration: none;
+              border: 1px solid var(--rule);
+              padding: 5px 12px;
+              background: var(--paper2);
+              letter-spacing: 0.04em;
+              transition: border-color 0.12s;
+            "
+            onmouseover="this.style.borderColor = 'var(--ink)'"
+            onmouseout="this.style.borderColor = 'var(--rule)'"
+            ><svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+              /></svg
+            >anikchand461/todoc</a
+          >
+        </div>
+        <h1 class="hero-h1">
+          The task manager<br />your <em>terminal</em><br />deserves.
+        </h1>
+        <p class="hero-desc">
+          Fast, beautiful, and built entirely in your shell.
+          <strong>No apps. No accounts. No configuration.</strong> Just a
+          command and your tasks.
+        </p>
+        <div class="hero-actions">
+          <a href="#install" class="btn-ink">Get started →</a>
+          <a href="#demo" class="btn-ghost">▶ See demo</a>
+        </div>
+        <div class="pip-row">
+          <span class="pip-label">install</span>
+          <span class="pip-cmd">pip install todoc</span>
+          <button class="pip-copy" id="cpBtn" onclick="doCopy()">Copy</button>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="term-bar">
+          <div class="td1 r"></div>
+          <div class="td1 y"></div>
+          <div class="td1 g"></div>
+          <span class="tp2">~/projects/<span>myapp</span></span>
+        </div>
+        <div class="term-body">
+          <div>
+            <span class="tp">$</span> <span class="tc">todoc list</span>
+          </div>
+          <br />
+          <div class="rl">──────── ◈ T O D O C ────────────────</div>
+          <br />
+          <table
+            style="width: 100%; border-collapse: collapse; font-size: 12.5px"
+          >
+            <tr style="color: #2e4a4a; font-size: 11.5px">
+              <td style="padding: 4px 8px; width: 32px">#</td>
+              <td style="padding: 4px 8px; width: 80px">Priority</td>
+              <td style="padding: 4px 8px; width: 24px"></td>
+              <td style="padding: 4px 8px">Task</td>
+              <td style="padding: 4px 8px">Tags</td>
+            </tr>
+            <tr style="border-top: 1px solid #1a2626">
+              <td style="padding: 6px 8px; color: #4ab8b8">1</td>
+              <td style="padding: 6px 8px"><span class="chip-c">CRIT</span></td>
+              <td style="padding: 6px 8px; color: #e05555">○</td>
+              <td style="padding: 6px 8px; color: #e8e4d9">
+                Ship v2.0 release
+              </td>
+              <td style="padding: 6px 8px; color: #3a6060">due:Mon</td>
+            </tr>
+            <tr style="border-top: 1px solid #1a2626">
+              <td style="padding: 6px 8px; color: #4ab8b8">2</td>
+              <td style="padding: 6px 8px"><span class="chip-h">HIGH</span></td>
+              <td style="padding: 6px 8px; color: #e05555">○</td>
+              <td style="padding: 6px 8px; color: #e8e4d9">Fix login bug</td>
+              <td style="padding: 6px 8px; color: #3a6060">#bug #backend</td>
+            </tr>
+            <tr style="border-top: 1px solid #1a2626">
+              <td style="padding: 6px 8px; color: #4ab8b8">3</td>
+              <td style="padding: 6px 8px">
+                <span class="chip-m">MED&nbsp;</span>
+              </td>
+              <td style="padding: 6px 8px; color: #e05555">○</td>
+              <td style="padding: 6px 8px; color: #e8e4d9">Write unit tests</td>
+              <td style="padding: 6px 8px; color: #3a6060">#dev</td>
+            </tr>
+            <tr style="border-top: 1px solid #1a2626; opacity: 0.4">
+              <td style="padding: 6px 8px; color: #2e4040">4</td>
+              <td style="padding: 6px 8px">
+                <span class="chip-l">LOW&nbsp;</span>
+              </td>
+              <td style="padding: 6px 8px; color: #4dab6e">✓</td>
+              <td
+                style="
+                  padding: 6px 8px;
+                  color: #2e4040;
+                  text-decoration: line-through;
+                "
+              >
+                Update README
+              </td>
+              <td
+                style="
+                  padding: 6px 8px;
+                  color: #2e4040;
+                  text-decoration: line-through;
+                "
+              >
+                #docs
+              </td>
+            </tr>
+          </table>
+          <br />
+          <div
+            style="
+              color: #2e4a4a;
+              font-size: 12px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 0 8px;
+            "
+          >
+            <span style="color: #4dab6e; font-weight: 500">1</span
+            ><span>/4 done ·</span>
+            <span style="color: #d4a017; font-weight: 500">3</span
+            ><span>pending ·</span>
+            <span style="color: #4ab8b8; font-weight: 500">25%</span>
+            <span style="color: #4dab6e; letter-spacing: -1px">███</span
+            ><span style="color: #1e2828; letter-spacing: -1px"
+              >█████████████████████████</span
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stats-bar reveal">
+      <div class="sc">
+        <div class="sn"><em>16</em></div>
+        <div class="sl">commands available</div>
+      </div>
+      <div class="sc">
+        <div class="sn">4</div>
+        <div class="sl">priority levels</div>
+      </div>
+      <div class="sc">
+        <div class="sn">0</div>
+        <div class="sl">config required</div>
+      </div>
+      <div class="sc">
+        <div class="sn"><em>Python</em></div>
+        <div class="sl">3.10+ required</div>
+      </div>
+    </div>
+
+    <section id="demo" class="sec">
+      <div class="wrap">
+        <div class="reveal">
+          <div class="eyebrow">interactive demo</div>
+          <h2 class="sec-h">See every command<br />in <em>action</em></h2>
+          <p class="sec-sub">
+            Click a command on the left to see exactly what appears in your
+            terminal.
+          </p>
+        </div>
+        <div class="di reveal" style="transition-delay: 0.1s">
+          <div class="dnav">
+            <div class="dnav-t">Commands</div>
+            <div class="dtab on" onclick="st('list', this)">📋 todoc list</div>
+            <div class="dtab" onclick="st('add', this)">➕ todoc add</div>
+            <div class="dtab" onclick="st('done', this)">✅ todoc done</div>
+            <div class="dtab" onclick="st('edit', this)">✏️ todoc edit</div>
+            <div class="dtab" onclick="st('search', this)">🔎 todoc search</div>
+            <div class="dtab" onclick="st('stats', this)">📊 todoc stats</div>
+            <div class="dtab" onclick="st('export', this)">📤 todoc export</div>
+            <div class="dtab" onclick="st('reset', this)">💥 todoc reset</div>
+          </div>
+          <div class="dpane">
+            <div class="scene on" id="sc-list">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc list
+                  <span style="color: #5a7a6a">--by priority</span></span
+                >
+              </div>
+              <br />
+              <div class="rl">──── ◈ T O D O C · sorted by priority ────</div>
+              <br />
+              <table class="dt">
+                <tr>
+                  <th>#</th>
+                  <th>Priority</th>
+                  <th></th>
+                  <th>Task</th>
+                  <th>Tags</th>
+                </tr>
+                <tr>
+                  <td class="di2">1</td>
+                  <td><span class="chip-c">CRIT</span></td>
+                  <td style="color: #e05555; text-align: center">○</td>
+                  <td>Ship v2.0 release</td>
+                  <td style="color: #3a6060; font-size: 12px">due:Mon</td>
+                </tr>
+                <tr>
+                  <td class="di2">2</td>
+                  <td><span class="chip-h">HIGH</span></td>
+                  <td style="color: #e05555; text-align: center">○</td>
+                  <td>Fix login bug</td>
+                  <td style="color: #3a6060; font-size: 12px">#bug #backend</td>
+                </tr>
+                <tr>
+                  <td class="di2">3</td>
+                  <td><span class="chip-m">MED&nbsp;</span></td>
+                  <td style="color: #e05555; text-align: center">○</td>
+                  <td>Write unit tests</td>
+                  <td style="color: #3a6060; font-size: 12px">#dev</td>
+                </tr>
+                <tr class="dn">
+                  <td class="di2 dim">4</td>
+                  <td><span class="chip-l">LOW&nbsp;</span></td>
+                  <td style="color: #4dab6e; text-align: center">✓</td>
+                  <td>Update README</td>
+                  <td style="color: #2e3e3e; font-size: 12px">#docs</td>
+                </tr>
+              </table>
+              <br />
+              <div class="pbw">
+                <span class="dn">1</span><span>/4 done ·</span
+                ><span class="pn">3</span><span>pending ·</span
+                ><span class="pc">25%</span><span class="pbg">███</span
+                ><span class="pbe">█████████████████████████</span>
+              </div>
+            </div>
+
+            <div class="scene" id="sc-add">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc add <span class="ta">"Fix login bug"</span>
+                  <span style="color: #5a7a6a"
+                    >-p high --tags "#bug"</span
+                  ></span
+                >
+              </div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">✓ Task added</div>
+                <div class="pr">
+                  <span class="pl">id</span
+                  ><span class="pv" style="color: #4ab8b8">5</span>
+                </div>
+                <div class="pr">
+                  <span class="pl">task</span
+                  ><span class="pv">Fix login bug</span>
+                </div>
+                <div class="pr">
+                  <span class="pl">priority</span
+                  ><span class="pv"><span class="chip-h">HIGH</span></span>
+                </div>
+                <div class="pr">
+                  <span class="pl">tags</span
+                  ><span class="pv" style="color: #4ab8b8">#bug</span>
+                </div>
+              </div>
+              <br />
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc add <span class="ta">"Team retro"</span>
+                  <span style="color: #5a7a6a"
+                    >--tags "@alice fri 3pm"</span
+                  ></span
+                >
+              </div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">✓ Task added</div>
+                <div class="pr">
+                  <span class="pl">id</span
+                  ><span class="pv" style="color: #4ab8b8">6</span>
+                </div>
+                <div class="pr">
+                  <span class="pl">task</span><span class="pv">Team retro</span>
+                </div>
+                <div class="pr">
+                  <span class="pl">priority</span
+                  ><span class="pv"><span class="chip-m">MED&nbsp;</span></span>
+                </div>
+                <div class="pr">
+                  <span class="pl">tags</span
+                  ><span class="pv" style="color: #4ab8b8">@alice fri 3pm</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="scene" id="sc-done">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc">todoc done <span class="ta">1 3</span></span>
+              </div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">2 tasks completed 🎉</div>
+                <div
+                  class="pr"
+                  style="opacity: 0.4; text-decoration: line-through"
+                >
+                  <span class="pl">#1</span
+                  ><span class="pv">Ship v2.0 release</span>
+                </div>
+                <div
+                  class="pr"
+                  style="opacity: 0.4; text-decoration: line-through"
+                >
+                  <span class="pl">#3</span
+                  ><span class="pv">Write unit tests</span>
+                </div>
+                <div class="pr" style="margin-top: 8px">
+                  <span class="pv" style="color: #2e4040; font-size: 12px"
+                    >nice work — keep going!</span
+                  >
+                </div>
+              </div>
+              <br />
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc list
+                  <span style="color: #5a7a6a">--pending</span></span
+                >
+              </div>
+              <br />
+              <table class="dt">
+                <tr>
+                  <th>#</th>
+                  <th>Priority</th>
+                  <th></th>
+                  <th>Task</th>
+                  <th>Tags</th>
+                </tr>
+                <tr>
+                  <td class="di2">2</td>
+                  <td><span class="chip-h">HIGH</span></td>
+                  <td style="color: #e05555; text-align: center">○</td>
+                  <td>Fix login bug</td>
+                  <td style="color: #3a6060; font-size: 12px">#bug</td>
+                </tr>
+                <tr>
+                  <td class="di2">4</td>
+                  <td><span class="chip-l">LOW&nbsp;</span></td>
+                  <td style="color: #e05555; text-align: center">○</td>
+                  <td>Team retro</td>
+                  <td style="color: #3a6060; font-size: 12px">@alice</td>
+                </tr>
+              </table>
+              <div class="pbw">
+                <span class="dn">2</span><span>/4 done ·</span
+                ><span class="pn">2</span><span>pending ·</span
+                ><span class="pc">50%</span
+                ><span class="pbg">██████████████</span
+                ><span class="pbe">██████████████</span>
+              </div>
+            </div>
+
+            <div class="scene" id="sc-edit">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc edit <span class="ta">2</span>
+                  <span style="color: #5a7a6a"
+                    >-p critical --tags "#bug urgent"</span
+                  ></span
+                >
+              </div>
+              <br />
+              <div style="border: 1px solid #1a3a4a; padding: 14px 18px">
+                <div
+                  style="
+                    color: #4ab8b8;
+                    font-size: 12px;
+                    font-weight: 500;
+                    margin-bottom: 10px;
+                  "
+                >
+                  ◈ Task #2
+                </div>
+                <div class="pr">
+                  <span class="pl">status</span
+                  ><span class="pv" style="color: #e05555">○ pending</span>
+                </div>
+                <div class="pr">
+                  <span class="pl">priority</span
+                  ><span class="pv"><span class="chip-c">CRIT</span></span>
+                </div>
+                <div class="pr">
+                  <span class="pl">tags</span
+                  ><span class="pv" style="color: #4ab8b8">#bug urgent</span>
+                </div>
+                <div class="pr">
+                  <span class="pl">description</span
+                  ><span class="pv">Fix login bug on mobile</span>
+                </div>
+              </div>
+              <br />
+              <div style="color: #4dab6e; font-size: 12px">
+                <span style="background: #1a4a2a; padding: 2px 8px">✓ OK</span>
+                Task #2 updated.
+              </div>
+            </div>
+
+            <div class="scene" id="sc-search">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc search <span class="ta">"#bug"</span></span
+                >
+              </div>
+              <br />
+              <div class="rl">── ◈ Search · "#bug" · 2 result(s) ──</div>
+              <br />
+              <table class="dt">
+                <tr>
+                  <th>#</th>
+                  <th>Priority</th>
+                  <th></th>
+                  <th>Task</th>
+                  <th>Tags</th>
+                </tr>
+                <tr>
+                  <td class="di2" style="text-decoration: underline">2</td>
+                  <td><span class="chip-c">CRIT</span></td>
+                  <td style="color: #e05555; text-align: center">○</td>
+                  <td>Fix login bug</td>
+                  <td style="color: #3a6060; font-size: 12px">#bug #backend</td>
+                </tr>
+                <tr>
+                  <td class="di2" style="text-decoration: underline">7</td>
+                  <td><span class="chip-m">MED&nbsp;</span></td>
+                  <td style="color: #e05555; text-align: center">○</td>
+                  <td>Fix pagination bug</td>
+                  <td style="color: #3a6060; font-size: 12px">
+                    #bug #frontend
+                  </td>
+                </tr>
+              </table>
+              <br />
+              <div style="color: #1e3030; font-size: 12px; padding: 0 8px">
+                ── 2 match(es) for "#bug" ──
+              </div>
+            </div>
+
+            <div class="scene" id="sc-stats">
+              <div>
+                <span class="tp">$</span> <span class="tc">todoc stats</span>
+              </div>
+              <br />
+              <div class="pan inf">
+                <div class="pt">◈ Statistics</div>
+                <div class="pr">
+                  <span class="pl" style="color: #2e4040">Total</span
+                  ><span class="pv">8</span>
+                </div>
+                <div class="pr">
+                  <span class="pl" style="color: #4dab6e">Done</span
+                  ><span class="pv">3</span>
+                </div>
+                <div class="pr">
+                  <span class="pl" style="color: #d4a017">Pending</span
+                  ><span class="pv">5</span>
+                </div>
+                <div style="height: 8px"></div>
+                <div class="pr">
+                  <span class="pl" style="color: #4ab8b8">Progress</span
+                  ><span
+                    ><span class="pbg">████████████</span
+                    ><span class="pbe">████████████████████</span
+                    ><span style="color: #4ab8b8; margin-left: 8px"
+                      >38%</span
+                    ></span
+                  >
+                </div>
+                <div style="height: 8px"></div>
+                <div
+                  style="color: #2e4040; font-size: 12px; margin-bottom: 8px"
+                >
+                  ── by priority ──
+                </div>
+                <div class="pr">
+                  <span><span class="chip-c">CRIT</span></span
+                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
+                    >2 task(s)</span
+                  >
+                </div>
+                <div class="pr">
+                  <span><span class="chip-h">HIGH</span></span
+                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
+                    >3 task(s)</span
+                  >
+                </div>
+                <div class="pr">
+                  <span><span class="chip-m">MED&nbsp;</span></span
+                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
+                    >2 task(s)</span
+                  >
+                </div>
+                <div class="pr">
+                  <span><span class="chip-l">LOW&nbsp;</span></span
+                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
+                    >1 task(s)</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="scene" id="sc-export">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc export
+                  <span style="color: #5a7a6a">-o backup.json</span></span
+                >
+              </div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">✓ Exported</div>
+                <div class="pr">
+                  <span class="pv"
+                    >8 task(s) → <span style="color: #4ab8b8">backup.json</span>
+                    <span style="color: #2e4040">(json)</span></span
+                  >
+                </div>
+              </div>
+              <br />
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc export
+                  <span style="color: #5a7a6a"
+                    >--format csv -o tasks.csv</span
+                  ></span
+                >
+              </div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">✓ Exported</div>
+                <div class="pr">
+                  <span class="pv"
+                    >8 task(s) → <span style="color: #4ab8b8">tasks.csv</span>
+                    <span style="color: #2e4040">(csv)</span></span
+                  >
+                </div>
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">
+                backup.json — full fidelity JSON, perfect for backups<br />tasks.csv
+                — opens in Excel / Google Sheets directly
+              </div>
+            </div>
+
+            <div class="scene" id="sc-reset">
+              <div>
+                <span class="tp">$</span> <span class="tc">todoc reset</span>
+              </div>
+              <br />
+              <div style="color: #e05555; margin: 4px 0">
+                ⚠ This will permanently delete all 8 task(s).
+              </div>
+              <div style="color: #2e4040; font-size: 12px; margin-bottom: 12px">
+                This cannot be undone. Run todoc export first to back up.
+              </div>
+              <div style="color: #c8d4d4">
+                Delete everything? [y/N]: <span style="color: #d4a017">y</span>
+              </div>
+              <br />
+              <div class="pan wa">
+                <div class="pt">Reset complete</div>
+                <div class="pr">
+                  <span class="pv" style="color: #e05555; font-weight: 500"
+                    >8</span
+                  ><span class="pv"> task(s) deleted.</span>
+                </div>
+                <div class="pr">
+                  <span class="pv" style="color: #2e4040; font-size: 12px"
+                    >todoc is now empty.</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="sec">
+      <div class="wrap">
+        <div class="reveal">
+          <div class="eyebrow">why todoc</div>
+          <h2 class="sec-h">Built for the<br />terminal <em>native</em></h2>
+        </div>
+        <div class="fg">
+          <div class="fc reveal">
+            <div class="fn">01</div>
+            <div class="ft">Zero configuration</div>
+            <p class="fd">
+              Install and go. Tasks live in <code>~/.todoc/tasks.json</code> —
+              plain JSON on your machine. No accounts, no sync, no setup wizard.
+            </p>
+          </div>
+          <div class="fc reveal" style="transition-delay: 0.05s">
+            <div class="fn">02</div>
+            <div class="ft">Beautiful Rich output</div>
+            <p class="fd">
+              Every command renders polished tables with priority chips, ASCII
+              progress bars, and consistent panel feedback via
+              <code>Rich</code>.
+            </p>
+          </div>
+          <div class="fc reveal" style="transition-delay: 0.1s">
+            <div class="fn">03</div>
+            <div class="ft">Free-form Tags column</div>
+            <p class="fd">
+              The Tags field is entirely yours. Store <code>#hashtags</code>,
+              due dates, links, names, ticket IDs — any text. No enforced
+              structure.
+            </p>
+          </div>
+          <div class="fc reveal" style="transition-delay: 0.15s">
+            <div class="fn">04</div>
+            <div class="ft">Bulk operations</div>
+            <p class="fd">
+              Mark multiple tasks done at once: <code>todoc done 1 4 7</code>.
+              Done tasks stay visible with strikethrough so progress is always
+              clear.
+            </p>
+          </div>
+          <div class="fc reveal" style="transition-delay: 0.2s">
+            <div class="fn">05</div>
+            <div class="ft">Full-text search</div>
+            <p class="fd">
+              Search description and tags instantly.
+              <code>todoc search "#bug"</code> finds every match. Partial words
+              included, case-insensitive.
+            </p>
+          </div>
+          <div class="fc reveal" style="transition-delay: 0.25s">
+            <div class="fn">06</div>
+            <div class="ft">Export to JSON &amp; CSV</div>
+            <p class="fd">
+              Back up with <code>todoc export -o backup.json</code> or use
+              <code>--format csv</code> to open tasks in Excel or Google Sheets.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="commands" class="sec">
+      <div class="wrap">
+        <div class="reveal">
+          <div class="eyebrow">reference</div>
+          <h2 class="sec-h">Every command,<br /><em>documented</em></h2>
+          <p class="sec-sub">
+            Run
+            <code
+              style="
+                color: var(--amber);
+                background: var(--amber-light);
+                padding: 1px 6px;
+                font-family: var(--mono);
+                font-size: 13px;
+              "
+              >todoc help</code
+            >
+            for the full reference, or
+            <code
+              style="
+                color: var(--amber);
+                background: var(--amber-light);
+                padding: 1px 6px;
+                font-family: var(--mono);
+                font-size: 13px;
+              "
+              >todoc --summary</code
+            >
+            for a quick cheat sheet.
+          </p>
+        </div>
+        <div class="cl">
+          <div class="reveal">
+            <div style="margin-bottom: 32px">
+              <div class="cg-lbl">Creating &amp; Viewing</div>
+              <div class="crow">
+                <span class="cn">add</span
+                ><span class="cd">Create a new task</span>
+              </div>
+              <div class="crow">
+                <span class="cn">list</span
+                ><span class="cd"
+                  >Show all tasks — done tasks have strikethrough</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">show</span
+                ><span class="cd">Full detail panel for a single task</span>
+              </div>
+              <div class="crow">
+                <span class="cn">search</span
+                ><span class="cd"
+                  >Full-text search across description and tags</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">sort</span
+                ><span class="cd"
+                  >Display list sorted by id, priority, or created</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">stats</span
+                ><span class="cd"
+                  >Completion statistics + priority breakdown</span
+                >
+              </div>
+            </div>
+            <div style="margin-bottom: 32px">
+              <div class="cg-lbl">Updating &amp; Removing</div>
+              <div class="crow">
+                <span class="cn">done</span
+                ><span class="cd"
+                  >Mark one or more tasks complete — bulk supported</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">undone</span
+                ><span class="cd">Reopen a completed task back to pending</span>
+              </div>
+              <div class="crow">
+                <span class="cn">edit</span
+                ><span class="cd"
+                  >Update any field — only passed flags change</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">delete</span
+                ><span class="cd">Remove a single task with confirmation</span>
+              </div>
+              <div class="crow">
+                <span class="cn">clear</span
+                ><span class="cd">Remove all completed tasks at once</span>
+              </div>
+              <div class="crow">
+                <span class="cn">reset</span
+                ><span class="cd red"
+                  >Wipe every task — complete reset, cannot be undone</span
+                >
+              </div>
+            </div>
+            <div>
+              <div class="cg-lbl">Import &amp; Export</div>
+              <div class="crow">
+                <span class="cn">export</span
+                ><span class="cd">Save tasks to JSON or CSV file</span>
+              </div>
+              <div class="crow">
+                <span class="cn">import</span
+                ><span class="cd">Load tasks back from a JSON backup</span>
+              </div>
+              <div class="crow">
+                <span class="cn">help</span
+                ><span class="cd"
+                  >Full per-command reference with examples</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="reveal" style="transition-delay: 0.12s">
+            <div class="fb">
+              <div class="fb-t">Common flags</div>
+              <div class="fr">
+                <span class="fnm">-p / --priority</span
+                ><span class="fds">critical · high · medium · low</span
+                ><span class="fdf">medium</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--tags</span
+                ><span class="fds">Free-form info column</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--pending</span
+                ><span class="fds">Only unfinished tasks</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--completed</span
+                ><span class="fds">Only finished tasks</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--by</span
+                ><span class="fds">Sort: id · priority · created</span
+                ><span class="fdf">id</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--desc</span
+                ><span class="fds">Reverse the sort order</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--force / -f</span
+                ><span class="fds">Skip confirmation prompts</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--format</span
+                ><span class="fds">Export format: json or csv</span
+                ><span class="fdf">json</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">-o / --output</span
+                ><span class="fds">Write export to a file</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--summary / -s</span
+                ><span class="fds">Compact command cheat sheet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="install" class="sec">
+      <div class="wrap">
+        <div class="reveal">
+          <div class="eyebrow">get started</div>
+          <h2 class="sec-h">Running in<br /><em>30 seconds</em></h2>
+        </div>
+        <div class="il2 reveal" style="transition-delay: 0.08s">
+          <div class="inst-l">
+            <div class="ist">
+              <div class="is">
+                <div class="isn">1</div>
+                <div>
+                  <div class="ist-t">Install from PyPI</div>
+                  <div class="ist-d">
+                    Requires Python 3.10+. Installs
+                    <code
+                      style="
+                        font-family: var(--mono);
+                        font-size: 12px;
+                        color: var(--amber);
+                      "
+                      >typer</code
+                    >
+                    and
+                    <code
+                      style="
+                        font-family: var(--mono);
+                        font-size: 12px;
+                        color: var(--amber);
+                      "
+                      >rich</code
+                    >
+                    automatically.
+                  </div>
+                  <div class="cl2">
+                    <span class="ps">$</span><span>pip install todoc</span>
+                  </div>
+                </div>
+              </div>
+              <div class="is">
+                <div class="isn">2</div>
+                <div>
+                  <div class="ist-t">Add your first task</div>
+                  <div class="ist-d">
+                    The
+                    <code
+                      style="
+                        font-family: var(--mono);
+                        font-size: 12px;
+                        color: var(--amber);
+                      "
+                      >todoc</code
+                    >
+                    command is now globally available.
+                  </div>
+                  <div class="cl2">
+                    <span class="ps">$</span
+                    ><span>todoc add "My first task" -p high</span>
+                  </div>
+                </div>
+              </div>
+              <div class="is">
+                <div class="isn">3</div>
+                <div>
+                  <div class="ist-t">Explore the reference</div>
+                  <div class="ist-d">
+                    Full docs and a compact cheat sheet are built into the tool.
+                  </div>
+                  <div class="cl2">
+                    <span class="ps">$</span><span>todoc help</span>
+                  </div>
+                  <div class="cl2" style="margin-top: 4px">
+                    <span class="ps">$</span><span>todoc --summary</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="inote">
+              <span style="color: var(--amber); font-size: 14px; flex-shrink: 0"
+                >ℹ</span
+              ><span
+                >Tasks are stored in <strong>~/.todoc/tasks.json</strong> —
+                plain JSON on your local machine. No telemetry, no internet
+                required after install.</span
+              >
+            </div>
+          </div>
+          <div class="inst-r">
+            <div class="iln">
+              <span class="p">$</span><span class="c">pip install todoc</span>
+            </div>
+            <div class="io inf">Collecting todoc...</div>
+            <div class="io ok">Successfully installed todoc-0.1.0</div>
+            <div class="isp"></div>
+            <div class="iln">
+              <span class="p">$</span
+              ><span class="c">todoc add "Ship the feature" -p critical</span>
+            </div>
+            <div class="io ok">
+              ✓ Task added · id: 1 · <span class="chip-c">CRIT</span>
+            </div>
+            <div class="isp"></div>
+            <div class="iln">
+              <span class="p">$</span
+              ><span class="c">todoc add "Write tests" --tags "#dev"</span>
+            </div>
+            <div class="io ok">
+              ✓ Task added · id: 2 · <span class="chip-m">MED&nbsp;</span>
+            </div>
+            <div class="isp"></div>
+            <div class="iln">
+              <span class="p">$</span><span class="c">todoc done 1</span>
+            </div>
+            <div class="io ok">✓ Task #1 completed 🎉</div>
+            <div class="isp"></div>
+            <div class="iln">
+              <span class="p">$</span><span class="c">todoc stats</span>
+            </div>
+            <div class="io dim">
+              1/2 done · 1 pending · 50% ██████████████░░░░░░░░░░░░░░
+            </div>
+            <div class="isp"></div>
+            <div class="iln">
+              <span class="p">$</span
+              ><span class="c">todoc export -o backup.json</span>
+            </div>
+            <div class="io ok">✓ 2 task(s) → backup.json</div>
+            <div class="isp"></div>
+            <div class="iln">
+              <span class="p">$</span
+              ><span class="c" style="opacity: 0.4">█</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="ft2">
+        <div class="fce">
+          <div class="fce-lbl">about</div>
+          <div class="fce-t">todoc</div>
+          <p class="fce-s">
+            The most powerful terminal task manager. Built with Typer and Rich.
+            Open source, MIT licensed.
+          </p>
+        </div>
+        <div class="fce">
+          <div class="fce-lbl">links</div>
+          <div class="fls">
+            <a href="https://github.com/anikchand461/todoc" target="_blank"
+              >GitHub repository ↗</a
+            ><a href="https://pypi.org/project/todoc/0.1.0/" target="_blank"
+              >PyPI page ↗</a
+            ><a href="#demo">Interactive demo</a
+            ><a href="#commands">Command reference</a
+            ><a href="#install">Installation guide</a>
+          </div>
+        </div>
+        <div class="fce">
+          <div class="fce-lbl">quick commands</div>
+          <div class="fcmd">
+            $ todoc add "task" -p high<br />$ todoc list --by priority<br />$
+            todoc done 1 2 5<br />$ todoc search "#bug"<br />$ todoc export -o
+            backup.json<br />$ todoc --summary
+          </div>
+        </div>
+      </div>
+      <div class="fb2">
+        <div class="fbr">
+          <div class="fbm">◈</div>
+          <span class="fbn">todoc</span>
+        </div>
+        <span class="fcp"
+          >MIT License · Python 3.10+ · Built with Typer &amp; Rich</span
+        >
+      </div>
+    </footer>
+
+    <script>
+      function st(name, el) {
+        document
+          .querySelectorAll(".scene")
+          .forEach((s) => s.classList.remove("on"));
+        document
+          .querySelectorAll(".dtab")
+          .forEach((t) => t.classList.remove("on"));
+        document.getElementById("sc-" + name).classList.add("on");
+        el.classList.add("on");
+      }
+      function doCopy() {
+        navigator.clipboard.writeText("pip install todoc").then(() => {
+          const b = document.getElementById("cpBtn");
+          b.textContent = "Copied!";
+          b.classList.add("ok");
+          setTimeout(() => {
+            b.textContent = "Copy";
+            b.classList.remove("ok");
+          }, 2000);
+        });
+      }
+      const obs = new IntersectionObserver(
+        (e) => {
+          e.forEach((x) => {
+            if (x.isIntersecting) {
+              x.target.classList.add("vis");
+              obs.unobserve(x.target);
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+      document.querySelectorAll(".reveal").forEach((el) => obs.observe(el));
+      const secs = document.querySelectorAll("section[id]"),
+        links = document.querySelectorAll(".nav-links a");
+      window.addEventListener(
+        "scroll",
+        () => {
+          let c = "";
+          secs.forEach((s) => {
+            if (window.scrollY >= s.offsetTop - 80) c = s.id;
+          });
+          links.forEach((a) => {
+            a.style.color =
+              a.getAttribute("href") === "#" + c ? "var(--ink)" : "";
+          });
+        },
+        { passive: true },
+      );
+    </script>
+  </body>
+</html>
