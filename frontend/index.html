@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>todoc — terminal task manager</title>
+    <title>todoc</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="canonical" href="https://todocpy.vercel.app" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,6 +19,11 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+      }
+      html,
+      body {
+        max-width: 100%;
+        overflow-x: hidden;
       }
       :root {
         --ink: #0c0c0b;
@@ -49,7 +54,6 @@
         font-size: 16px;
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
-        overflow-x: hidden;
       }
       .wrap {
         max-width: 1160px;
@@ -57,6 +61,7 @@
         padding: 0 clamp(16px, 4vw, 40px);
       }
 
+      /* ── NAV ── */
       nav {
         position: sticky;
         top: 0;
@@ -72,38 +77,42 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 8px;
       }
       .nav-brand {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         text-decoration: none;
         flex-shrink: 0;
+        min-width: 0;
       }
       .nav-mark {
-        width: 30px;
-        height: 30px;
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
         background: var(--ink);
         color: var(--paper);
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: var(--mono);
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
       }
       .nav-name {
         font-family: var(--grotesk);
         font-weight: 700;
-        font-size: 17px;
+        font-size: 16px;
         color: var(--ink);
         letter-spacing: -0.02em;
+        white-space: nowrap;
       }
       .nav-links {
         display: flex;
         align-items: center;
-        gap: 24px;
+        gap: 20px;
+        flex-shrink: 0;
       }
       .nav-links a {
         color: var(--muted);
@@ -111,6 +120,7 @@
         font-size: 13px;
         font-weight: 500;
         transition: color 0.12s;
+        white-space: nowrap;
       }
       .nav-links a:hover {
         color: var(--ink);
@@ -128,7 +138,7 @@
         font-weight: 600;
         font-size: 12px;
         letter-spacing: 0.04em;
-        padding: 7px 14px;
+        padding: 6px 12px;
         text-decoration: none;
         border: 1.5px solid var(--ink);
         transition: background 0.12s;
@@ -144,7 +154,7 @@
         font-weight: 600;
         font-size: 12px;
         letter-spacing: 0.04em;
-        padding: 7px 14px;
+        padding: 6px 12px;
         text-decoration: none;
         border: 1.5px solid var(--rule);
         transition: border-color 0.12s;
@@ -156,17 +166,18 @@
       .nav-gh:hover {
         border-color: var(--ink);
       }
-      @media (max-width: 640px) {
+      @media (max-width: 700px) {
         .nav-links {
           display: none;
         }
       }
-      @media (max-width: 400px) {
+      @media (max-width: 420px) {
         .nav-gh {
           display: none;
         }
       }
 
+      /* ── HERO ── */
       #hero {
         border-bottom: 1.5px solid var(--ink);
         display: grid;
@@ -181,38 +192,40 @@
         }
       }
       .hero-left {
-        padding: clamp(40px, 7vw, 80px) clamp(20px, 5vw, 56px)
-          clamp(40px, 7vw, 72px) clamp(16px, 4vw, 40px);
+        padding: clamp(36px, 6vw, 80px) clamp(16px, 4vw, 56px)
+          clamp(36px, 6vw, 72px);
         border-right: 1.5px solid var(--ink);
         display: flex;
         flex-direction: column;
         justify-content: center;
+        min-width: 0;
       }
       @media (max-width: 900px) {
         .hero-left {
           border-right: none;
-          padding: 48px clamp(16px, 4vw, 40px);
+          padding: 40px clamp(16px, 5vw, 40px);
         }
       }
       .hero-kicker-wrap {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 28px;
+        gap: 8px;
+        margin-bottom: 24px;
         flex-wrap: wrap;
       }
       .hero-kicker {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
         background: var(--amber-light);
         border: 1px solid var(--amber-border);
         color: var(--amber);
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.08em;
-        padding: 5px 12px;
+        padding: 5px 11px;
         text-transform: uppercase;
+        flex-shrink: 0;
       }
       .kicker-dot {
         width: 6px;
@@ -231,10 +244,11 @@
         color: var(--ink);
         text-decoration: none;
         border: 1px solid var(--rule);
-        padding: 5px 12px;
+        padding: 5px 11px;
         background: var(--paper2);
         letter-spacing: 0.04em;
         transition: border-color 0.12s;
+        white-space: nowrap;
       }
       .kicker-gh:hover {
         border-color: var(--ink);
@@ -250,22 +264,22 @@
       }
       .hero-h1 {
         font-family: var(--serif);
-        font-size: clamp(36px, 6vw, 80px);
+        font-size: clamp(34px, 5.5vw, 80px);
         line-height: 1;
         letter-spacing: -0.02em;
         color: var(--ink);
-        margin-bottom: 20px;
+        margin-bottom: 18px;
       }
       .hero-h1 em {
         font-style: italic;
         color: var(--amber);
       }
       .hero-desc {
-        font-size: clamp(14px, 1.8vw, 17px);
+        font-size: clamp(14px, 1.8vw, 16px);
         color: var(--muted);
         line-height: 1.65;
         max-width: 480px;
-        margin-bottom: 36px;
+        margin-bottom: 32px;
       }
       .hero-desc strong {
         color: var(--ink);
@@ -283,11 +297,12 @@
         font-family: var(--grotesk);
         font-weight: 600;
         font-size: 14px;
-        padding: 12px 24px;
+        padding: 12px 22px;
         text-decoration: none;
         border: 1.5px solid var(--ink);
         transition: background 0.12s;
         display: inline-block;
+        white-space: nowrap;
       }
       .btn-ink:hover {
         background: var(--ink3);
@@ -297,48 +312,51 @@
         color: var(--ink);
         font-family: var(--mono);
         font-size: 13px;
-        padding: 11px 18px;
+        padding: 11px 16px;
         text-decoration: none;
         border: 1.5px solid var(--rule);
         transition: border-color 0.12s;
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        white-space: nowrap;
       }
       .btn-ghost:hover {
         border-color: var(--ink);
       }
       .pip-row {
-        margin-top: 28px;
+        margin-top: 24px;
         display: flex;
-        align-items: center;
-        max-width: 100%;
-        overflow: hidden;
+        align-items: stretch;
+        width: 100%;
+        max-width: 440px;
       }
       .pip-label {
         font-size: 11px;
         color: var(--muted);
         font-family: var(--mono);
-        padding: 9px 12px;
+        padding: 10px 12px;
         border: 1.5px solid var(--rule);
         border-right: 0;
         background: var(--paper2);
         white-space: nowrap;
         flex-shrink: 0;
+        display: flex;
+        align-items: center;
       }
       .pip-cmd {
         font-family: var(--mono);
         font-size: 12px;
         color: var(--ink);
-        padding: 9px 14px;
+        padding: 10px 12px;
         border: 1.5px solid var(--rule);
         border-right: 0;
         background: white;
+        flex: 1;
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        flex: 1;
       }
       .pip-copy {
         background: var(--amber);
@@ -346,7 +364,7 @@
         font-family: var(--grotesk);
         font-weight: 600;
         font-size: 12px;
-        padding: 9px 14px;
+        padding: 10px 14px;
         border: 1.5px solid var(--amber);
         cursor: pointer;
         letter-spacing: 0.04em;
@@ -362,10 +380,12 @@
         border-color: #2c7a2c;
       }
 
+      /* Hero terminal */
       .hero-right {
         background: var(--ink);
         display: flex;
         flex-direction: column;
+        overflow: hidden;
       }
       .term-bar {
         background: var(--ink2);
@@ -374,11 +394,13 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        flex-shrink: 0;
       }
       .td1 {
         width: 11px;
         height: 11px;
         border-radius: 50%;
+        flex-shrink: 0;
       }
       .td1.r {
         background: #e05555;
@@ -394,17 +416,20 @@
         font-size: 12px;
         color: #4a5050;
         margin-left: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .tp2 span {
         color: #5a7a7a;
       }
       .term-body {
-        padding: 24px;
+        padding: 20px;
         font-family: var(--mono);
-        font-size: 12.5px;
-        line-height: 1.9;
+        font-size: 12px;
+        line-height: 1.8;
         flex: 1;
-        overflow-x: auto;
+        overflow: hidden;
       }
       .tp {
         color: #4dab6e;
@@ -415,36 +440,44 @@
       .chip-c {
         background: #c0392b;
         color: #fff;
-        padding: 1px 6px;
-        font-size: 11px;
+        padding: 1px 5px;
+        font-size: 10px;
+        white-space: nowrap;
       }
       .chip-h {
         background: #5a1a1a;
         color: #ff9a9a;
-        padding: 1px 6px;
-        font-size: 11px;
+        padding: 1px 5px;
+        font-size: 10px;
         border: 1px solid #8b2a2a;
+        white-space: nowrap;
       }
       .chip-m {
         background: #3a2e00;
         color: #d4a017;
-        padding: 1px 6px;
-        font-size: 11px;
+        padding: 1px 5px;
+        font-size: 10px;
         border: 1px solid #5a4800;
+        white-space: nowrap;
       }
       .chip-l {
         background: #0d2e1a;
         color: #4dab6e;
-        padding: 1px 6px;
-        font-size: 11px;
+        padding: 1px 5px;
+        font-size: 10px;
         border: 1px solid #1a5c3a;
+        white-space: nowrap;
       }
       .rl {
         color: #2a4040;
-        margin: 6px 0;
-        font-size: 12px;
+        margin: 4px 0;
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
+      /* ── STATS BAR ── */
       .stats-bar {
         border-bottom: 1.5px solid var(--ink);
         display: grid;
@@ -455,9 +488,15 @@
           grid-template-columns: 1fr 1fr;
         }
       }
+      @media (max-width: 360px) {
+        .stats-bar {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
       .sc {
-        padding: clamp(18px, 3vw, 28px) clamp(16px, 3vw, 32px);
+        padding: clamp(16px, 3vw, 28px) clamp(14px, 3vw, 32px);
         border-right: 1px solid var(--rule);
+        min-width: 0;
       }
       .sc:last-child {
         border-right: none;
@@ -470,26 +509,34 @@
         .sc:nth-child(odd) {
           border-right: 1px solid var(--rule);
         }
+        .sc:nth-child(3),
+        .sc:nth-child(4) {
+          border-bottom: none;
+        }
       }
       .sn {
         font-family: var(--serif);
-        font-size: clamp(28px, 4vw, 42px);
+        font-size: clamp(24px, 4vw, 42px);
         color: var(--ink);
         line-height: 1;
         margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .sn em {
         font-style: italic;
         color: var(--amber);
       }
       .sl {
-        font-size: 12px;
+        font-size: 11px;
         color: var(--muted);
         font-weight: 500;
       }
 
+      /* ── SECTIONS ── */
       .sec {
-        padding: clamp(52px, 8vw, 88px) 0;
+        padding: clamp(48px, 7vw, 88px) 0;
         border-bottom: 1.5px solid var(--rule2);
       }
       .eyebrow {
@@ -498,34 +545,36 @@
         text-transform: uppercase;
         color: var(--muted2);
         font-weight: 600;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
       .sec-h {
         font-family: var(--serif);
-        font-size: clamp(28px, 4vw, 52px);
+        font-size: clamp(26px, 4vw, 52px);
         line-height: 1.05;
         letter-spacing: -0.02em;
         color: var(--ink);
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
       .sec-h em {
         font-style: italic;
         color: var(--amber);
       }
       .sec-sub {
-        font-size: 15px;
+        font-size: 14px;
         color: var(--muted);
         max-width: 520px;
         line-height: 1.65;
       }
 
+      /* ── DEMO ── */
       #demo .di {
         display: grid;
-        grid-template-columns: 180px 1fr;
+        grid-template-columns: 160px 1fr;
         border: 1.5px solid var(--ink);
-        margin-top: 40px;
+        margin-top: 36px;
+        overflow: hidden;
       }
-      @media (max-width: 700px) {
+      @media (max-width: 640px) {
         #demo .di {
           grid-template-columns: 1fr;
         }
@@ -534,14 +583,16 @@
         border-right: 1.5px solid var(--ink);
         display: flex;
         flex-direction: column;
+        min-width: 0;
       }
-      @media (max-width: 700px) {
+      @media (max-width: 640px) {
         .dnav {
           border-right: none;
           border-bottom: 1.5px solid var(--ink);
           flex-direction: row;
           overflow-x: auto;
           scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
         }
         .dnav::-webkit-scrollbar {
           display: none;
@@ -551,18 +602,19 @@
         }
       }
       .dnav-t {
-        padding: 12px 18px;
-        font-size: 11px;
+        padding: 11px 16px;
+        font-size: 10px;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--muted2);
         font-weight: 600;
         border-bottom: 1px solid var(--rule2);
+        white-space: nowrap;
       }
       .dtab {
-        padding: 12px 18px;
+        padding: 11px 16px;
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 11.5px;
         color: var(--muted);
         cursor: pointer;
         border-bottom: 1px solid var(--rule2);
@@ -571,7 +623,7 @@
         user-select: none;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
         white-space: nowrap;
       }
       .dtab:hover {
@@ -584,27 +636,30 @@
         background: var(--amber-pale);
         border-left-color: var(--amber);
       }
-      @media (max-width: 700px) {
+      @media (max-width: 640px) {
         .dtab {
           border-bottom: none;
           border-left: none;
           border-bottom: 3px solid transparent;
           flex-shrink: 0;
           padding: 10px 14px;
+          font-size: 11px;
         }
         .dtab.on {
           border-bottom-color: var(--amber);
           border-left-color: transparent;
         }
       }
+      /* Demo pane — key: overflow-x:auto so tables scroll instead of breaking layout */
       .dpane {
         background: var(--ink);
-        min-height: 400px;
-        padding: clamp(16px, 3vw, 28px) clamp(16px, 3vw, 32px);
+        min-height: 360px;
+        padding: clamp(14px, 3vw, 24px);
         font-family: var(--mono);
-        font-size: 12.5px;
-        line-height: 1.9;
+        font-size: 12px;
+        line-height: 1.85;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
       .scene {
         display: none;
@@ -612,24 +667,26 @@
       .scene.on {
         display: block;
       }
+      /* Tables inside demo — min-width makes them scroll inside .dpane, not break page */
       .dt {
-        width: 100%;
         border-collapse: collapse;
         margin: 4px 0;
-        min-width: 380px;
+        min-width: 340px;
+        width: 100%;
       }
       .dt th {
-        font-size: 11px;
+        font-size: 10.5px;
         color: #4a5a5a;
         font-weight: 400;
-        padding: 5px 8px;
+        padding: 4px 8px;
         border-bottom: 1px solid #1e2828;
         text-align: left;
+        white-space: nowrap;
       }
       .dt td {
-        padding: 6px 8px;
+        padding: 5px 8px;
         border-bottom: 1px solid #161e1e;
-        font-size: 12px;
+        font-size: 11.5px;
         color: #c8d4d4;
         vertical-align: middle;
       }
@@ -643,7 +700,7 @@
       .di2 {
         color: #4ab8b8;
         font-weight: 500;
-        width: 32px;
+        width: 28px;
       }
       .di2.dim {
         color: #2e3e3e;
@@ -652,9 +709,9 @@
       .pbw {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 8px;
-        font-size: 12px;
+        gap: 6px;
+        padding: 6px 8px;
+        font-size: 11.5px;
         color: #2e4a4a;
         margin-top: 4px;
         flex-wrap: wrap;
@@ -681,8 +738,8 @@
       }
       .pan {
         border: 1px solid;
-        padding: 14px 18px;
-        margin: 6px 0;
+        padding: 12px 16px;
+        margin: 5px 0;
       }
       .pan.ok {
         border-color: #1a4a2a;
@@ -697,9 +754,9 @@
         border-color: #4a1a4a;
       }
       .pt {
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 500;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         letter-spacing: 0.03em;
       }
       .pan.ok .pt {
@@ -716,40 +773,43 @@
       }
       .pr {
         display: flex;
-        gap: 10px;
-        font-size: 12px;
-        margin-top: 4px;
+        gap: 8px;
+        font-size: 11.5px;
+        margin-top: 3px;
         flex-wrap: wrap;
       }
       .pl {
         color: #2e4040;
-        min-width: 76px;
+        min-width: 64px;
+        flex-shrink: 0;
       }
       .pv {
         color: #c8d4d4;
       }
 
+      /* ── FEATURES ── */
       #features .fg {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         border: 1.5px solid var(--rule2);
-        margin-top: 40px;
+        margin-top: 36px;
       }
-      @media (max-width: 900px) {
+      @media (max-width: 860px) {
         #features .fg {
           grid-template-columns: 1fr 1fr;
         }
       }
-      @media (max-width: 540px) {
+      @media (max-width: 500px) {
         #features .fg {
           grid-template-columns: 1fr;
         }
       }
       .fc {
-        padding: clamp(24px, 4vw, 36px) clamp(20px, 3vw, 32px);
+        padding: clamp(20px, 4vw, 36px) clamp(16px, 3vw, 32px);
         border: 0.5px solid var(--rule2);
         transition: background 0.15s;
         position: relative;
+        min-width: 0;
       }
       .fc:hover {
         background: var(--amber-pale);
@@ -758,8 +818,8 @@
         content: "";
         position: absolute;
         bottom: 0;
-        left: clamp(20px, 3vw, 32px);
-        right: clamp(20px, 3vw, 32px);
+        left: clamp(16px, 3vw, 32px);
+        right: clamp(16px, 3vw, 32px);
         height: 2px;
         background: var(--amber);
         transform: scaleX(0);
@@ -771,9 +831,9 @@
       }
       .fn {
         font-family: var(--serif);
-        font-size: 28px;
+        font-size: 26px;
         color: var(--paper3);
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
       .ft {
         font-weight: 700;
@@ -790,57 +850,62 @@
       .fd code {
         color: var(--amber);
         background: var(--amber-light);
-        padding: 1px 5px;
+        padding: 1px 4px;
         font-family: var(--mono);
-        font-size: 11.5px;
+        font-size: 11px;
       }
 
+      /* ── COMMANDS ── */
       #commands .cl {
         display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 48px;
-        margin-top: 40px;
+        grid-template-columns: 1fr 320px;
+        gap: 40px;
+        margin-top: 36px;
         align-items: start;
       }
-      @media (max-width: 960px) {
+      @media (max-width: 900px) {
         #commands .cl {
           grid-template-columns: 1fr;
-          gap: 32px;
+          gap: 28px;
         }
       }
       .cg-lbl {
-        font-size: 11px;
+        font-size: 10px;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--muted2);
         font-weight: 600;
-        padding: 10px 0;
+        padding: 9px 0;
         border-bottom: 1.5px solid var(--ink);
       }
       .crow {
         display: grid;
-        grid-template-columns: 80px 1fr;
-        padding: 10px 0;
+        grid-template-columns: 76px 1fr;
+        padding: 9px 0;
         border-bottom: 1px solid var(--rule2);
         transition:
           padding 0.1s,
           background 0.1s;
+        min-width: 0;
       }
       .crow:hover {
         background: var(--paper2);
-        padding-left: 8px;
-        padding-right: 8px;
-        margin: 0 -8px;
+        padding-left: 6px;
+        padding-right: 6px;
+        margin: 0 -6px;
       }
       .cn {
         font-family: var(--mono);
-        font-size: 13px;
+        font-size: 12px;
         color: var(--amber);
         font-weight: 500;
+        min-width: 0;
+        overflow: hidden;
       }
       .cd {
-        font-size: 13px;
+        font-size: 12.5px;
         color: var(--ink);
+        min-width: 0;
       }
       .cd.red {
         color: #a32d2d;
@@ -849,15 +914,15 @@
         background: var(--paper2);
         border: 1.5px solid var(--ink);
       }
-      @media (min-width: 960px) {
+      @media (min-width: 900px) {
         .fb {
           position: sticky;
-          top: 70px;
+          top: 68px;
         }
       }
       .fb-t {
-        padding: 13px 18px;
-        font-size: 11px;
+        padding: 12px 16px;
+        font-size: 10px;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--muted);
@@ -867,49 +932,54 @@
       .fr {
         display: flex;
         align-items: baseline;
-        gap: 8px;
-        padding: 9px 18px;
+        gap: 6px;
+        padding: 8px 16px;
         border-bottom: 1px solid var(--rule2);
         flex-wrap: wrap;
+        min-width: 0;
       }
       .fr:last-child {
         border-bottom: none;
       }
       .fnm {
         font-family: var(--mono);
-        font-size: 11.5px;
+        font-size: 11px;
         color: var(--ink3);
         font-weight: 500;
-        min-width: 110px;
+        min-width: 100px;
+        flex-shrink: 0;
       }
       .fds {
-        font-size: 12px;
+        font-size: 11.5px;
         color: var(--muted);
         flex: 1;
+        min-width: 0;
       }
       .fdf {
         font-family: var(--mono);
-        font-size: 11px;
+        font-size: 10px;
         color: var(--amber);
         white-space: nowrap;
       }
 
+      /* ── INSTALL ── */
       #install .il2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
         border: 1.5px solid var(--ink);
-        margin-top: 40px;
+        margin-top: 36px;
       }
-      @media (max-width: 860px) {
+      @media (max-width: 800px) {
         #install .il2 {
           grid-template-columns: 1fr;
         }
       }
       .inst-l {
-        padding: clamp(28px, 4vw, 48px) clamp(20px, 4vw, 44px);
+        padding: clamp(24px, 4vw, 48px) clamp(16px, 4vw, 44px);
         border-right: 1.5px solid var(--ink);
+        min-width: 0;
       }
-      @media (max-width: 860px) {
+      @media (max-width: 800px) {
         .inst-l {
           border-right: none;
           border-bottom: 1.5px solid var(--ink);
@@ -918,16 +988,16 @@
       .ist {
         display: flex;
         flex-direction: column;
-        gap: 28px;
+        gap: 24px;
       }
       .is {
         display: flex;
-        gap: 18px;
+        gap: 16px;
         align-items: flex-start;
       }
       .isn {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         flex-shrink: 0;
         background: var(--ink);
         color: var(--paper);
@@ -942,7 +1012,7 @@
         font-weight: 700;
         font-size: 15px;
         color: var(--ink);
-        margin-bottom: 5px;
+        margin-bottom: 4px;
       }
       .ist-d {
         font-size: 13px;
@@ -952,14 +1022,16 @@
       .cl2 {
         background: var(--paper3);
         border: 1px solid var(--rule);
-        padding: 9px 14px;
+        padding: 8px 12px;
         font-family: var(--mono);
-        font-size: 12.5px;
+        font-size: 12px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-top: 2px;
+        gap: 8px;
+        margin-top: 3px;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
       }
       .cl2 .ps {
         color: #2c7a2c;
@@ -967,13 +1039,13 @@
         flex-shrink: 0;
       }
       .inote {
-        margin-top: 24px;
-        padding: 16px 18px;
+        margin-top: 20px;
+        padding: 14px 16px;
         border: 1px solid var(--amber-border);
         background: var(--amber-pale);
         display: flex;
-        gap: 12px;
-        font-size: 13px;
+        gap: 10px;
+        font-size: 12.5px;
         color: var(--muted);
       }
       .inote strong {
@@ -981,25 +1053,31 @@
       }
       .inst-r {
         background: var(--ink);
-        padding: clamp(20px, 3vw, 36px) clamp(16px, 3vw, 32px);
+        padding: clamp(18px, 3vw, 32px) clamp(16px, 3vw, 28px);
         font-family: var(--mono);
-        font-size: 12.5px;
-        line-height: 1.9;
+        font-size: 12px;
+        line-height: 1.85;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        min-width: 0;
       }
       .iln {
         display: flex;
         gap: 8px;
+        min-width: 0;
       }
       .iln .p {
         color: #4dab6e;
+        flex-shrink: 0;
       }
       .iln .c {
         color: #e8e4d9;
+        white-space: nowrap;
       }
       .io {
-        font-size: 11.5px;
+        font-size: 11px;
         margin: 1px 0;
+        white-space: nowrap;
       }
       .io.ok {
         color: #4dab6e;
@@ -1011,9 +1089,10 @@
         color: #4a6060;
       }
       .isp {
-        height: 8px;
+        height: 7px;
       }
 
+      /* ── FOOTER ── */
       footer {
         background: var(--ink);
         color: var(--paper);
@@ -1023,24 +1102,25 @@
         grid-template-columns: 1fr 1fr 1fr;
         border-bottom: 1px solid #1e2828;
       }
-      @media (max-width: 800px) {
+      @media (max-width: 760px) {
         .ft2 {
           grid-template-columns: 1fr 1fr;
         }
       }
-      @media (max-width: 500px) {
+      @media (max-width: 460px) {
         .ft2 {
           grid-template-columns: 1fr;
         }
       }
       .fce {
-        padding: clamp(28px, 4vw, 48px) clamp(20px, 4vw, 40px);
+        padding: clamp(24px, 4vw, 48px) clamp(16px, 4vw, 40px);
         border-right: 1px solid #1e2828;
+        min-width: 0;
       }
       .fce:last-child {
         border-right: none;
       }
-      @media (max-width: 800px) {
+      @media (max-width: 760px) {
         .fce:nth-child(2) {
           border-right: none;
         }
@@ -1048,34 +1128,43 @@
           border-bottom: 1px solid #1e2828;
         }
       }
+      @media (max-width: 460px) {
+        .fce {
+          border-right: none;
+          border-bottom: 1px solid #1e2828;
+        }
+        .fce:last-child {
+          border-bottom: none;
+        }
+      }
       .fce-lbl {
-        font-size: 11px;
+        font-size: 10px;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         color: #4a5a5a;
         font-weight: 600;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
       }
       .fce-t {
         font-family: var(--serif);
-        font-size: clamp(22px, 3vw, 28px);
+        font-size: clamp(20px, 3vw, 28px);
         color: #e8e4d9;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
       .fce-s {
-        font-size: 13px;
+        font-size: 12.5px;
         color: #5a6868;
         line-height: 1.6;
       }
       .fls {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 9px;
       }
       .fls a {
         color: #5a6868;
         text-decoration: none;
-        font-size: 13.5px;
+        font-size: 13px;
         transition: color 0.12s;
       }
       .fls a:hover {
@@ -1083,26 +1172,26 @@
       }
       .fcmd {
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 11.5px;
         color: #4a6060;
-        line-height: 2.1;
+        line-height: 2;
       }
       .fb2 {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: clamp(16px, 3vw, 24px) clamp(16px, 4vw, 40px);
+        padding: clamp(14px, 3vw, 24px) clamp(16px, 4vw, 40px);
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
       }
       .fbr {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
       }
       .fbm {
-        width: 26px;
-        height: 26px;
+        width: 24px;
+        height: 24px;
         background: var(--paper);
         display: flex;
         align-items: center;
@@ -1111,24 +1200,26 @@
         font-size: 12px;
         color: var(--ink);
         font-weight: 500;
+        flex-shrink: 0;
       }
       .fbn {
         font-family: var(--grotesk);
         font-weight: 700;
-        font-size: 15px;
+        font-size: 14px;
         color: #e8e4d9;
       }
       .fcp {
-        font-size: 11.5px;
+        font-size: 11px;
         color: #3a4848;
       }
 
+      /* ── Scroll reveal ── */
       .reveal {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(18px);
         transition:
-          opacity 0.65s ease,
-          transform 0.65s ease;
+          opacity 0.6s ease,
+          transform 0.6s ease;
       }
       .reveal.vis {
         opacity: 1;
@@ -1228,78 +1319,90 @@
             <span class="tp">$</span> <span class="tc">todoc list</span>
           </div>
           <br />
-          <div class="rl">──────── ◈ T O D O C ────────────────</div>
+          <div class="rl">──── ◈ T O D O C ────</div>
           <br />
-          <table
-            style="width: 100%; border-collapse: collapse; font-size: 12.5px"
-          >
-            <tr style="color: #2e4a4a; font-size: 11.5px">
-              <td style="padding: 4px 8px; width: 32px">#</td>
-              <td style="padding: 4px 8px; width: 80px">Priority</td>
-              <td style="padding: 4px 8px; width: 24px">St</td>
-              <td style="padding: 4px 8px">Task</td>
-              <td style="padding: 4px 8px">Tags</td>
-            </tr>
-            <tr style="border-top: 1px solid #1a2626">
-              <td style="padding: 6px 8px; color: #4ab8b8">1</td>
-              <td style="padding: 6px 8px"><span class="chip-c">CRIT</span></td>
-              <td style="padding: 6px 8px; color: #e05555">○</td>
-              <td style="padding: 6px 8px; color: #e8e4d9">
-                Ship v2.0 release
-              </td>
-              <td style="padding: 6px 8px; color: #3a6060">due:Mon</td>
-            </tr>
-            <tr style="border-top: 1px solid #1a2626">
-              <td style="padding: 6px 8px; color: #4ab8b8">2</td>
-              <td style="padding: 6px 8px"><span class="chip-h">HIGH</span></td>
-              <td style="padding: 6px 8px; color: #e05555">○</td>
-              <td style="padding: 6px 8px; color: #e8e4d9">Fix login bug</td>
-              <td style="padding: 6px 8px; color: #3a6060">#bug #backend</td>
-            </tr>
-            <tr style="border-top: 1px solid #1a2626">
-              <td style="padding: 6px 8px; color: #4ab8b8">3</td>
-              <td style="padding: 6px 8px">
-                <span class="chip-m">MED&nbsp;</span>
-              </td>
-              <td style="padding: 6px 8px; color: #4dab6e">✓</td>
-              <td
-                style="
-                  padding: 6px 8px;
-                  color: #2e4040;
-                  text-decoration: line-through;
-                "
-              >
-                Write unit tests
-              </td>
-              <td
-                style="
-                  padding: 6px 8px;
-                  color: #2e4040;
-                  text-decoration: line-through;
-                "
-              >
-                #dev
-              </td>
-            </tr>
-            <tr style="border-top: 1px solid #1a2626">
-              <td style="padding: 6px 8px; color: #4ab8b8">4</td>
-              <td style="padding: 6px 8px">
-                <span class="chip-l">LOW&nbsp;</span>
-              </td>
-              <td style="padding: 6px 8px; color: #e05555">○</td>
-              <td style="padding: 6px 8px; color: #e8e4d9">Update docs</td>
-              <td style="padding: 6px 8px; color: #3a6060">#docs</td>
-            </tr>
-          </table>
+          <div style="overflow-x: auto">
+            <table
+              style="
+                border-collapse: collapse;
+                font-size: 11.5px;
+                min-width: 300px;
+                width: 100%;
+              "
+            >
+              <tr style="color: #2e4a4a; font-size: 11.5px">
+                <td style="padding: 4px 8px; width: 32px">#</td>
+                <td style="padding: 4px 8px; width: 80px">Priority</td>
+                <td style="padding: 4px 8px; width: 24px">St</td>
+                <td style="padding: 4px 8px">Task</td>
+                <td style="padding: 4px 8px">Tags</td>
+              </tr>
+              <tr style="border-top: 1px solid #1a2626">
+                <td style="padding: 6px 8px; color: #4ab8b8">1</td>
+                <td style="padding: 6px 8px">
+                  <span class="chip-c">CRIT</span>
+                </td>
+                <td style="padding: 6px 8px; color: #e05555">○</td>
+                <td style="padding: 6px 8px; color: #e8e4d9">
+                  Ship v2.0 release
+                </td>
+                <td style="padding: 6px 8px; color: #3a6060">due:Mon</td>
+              </tr>
+              <tr style="border-top: 1px solid #1a2626">
+                <td style="padding: 6px 8px; color: #4ab8b8">2</td>
+                <td style="padding: 6px 8px">
+                  <span class="chip-h">HIGH</span>
+                </td>
+                <td style="padding: 6px 8px; color: #e05555">○</td>
+                <td style="padding: 6px 8px; color: #e8e4d9">Fix login bug</td>
+                <td style="padding: 6px 8px; color: #3a6060">#bug #backend</td>
+              </tr>
+              <tr style="border-top: 1px solid #1a2626">
+                <td style="padding: 6px 8px; color: #4ab8b8">3</td>
+                <td style="padding: 6px 8px">
+                  <span class="chip-m">MED&nbsp;</span>
+                </td>
+                <td style="padding: 6px 8px; color: #4dab6e">✓</td>
+                <td
+                  style="
+                    padding: 6px 8px;
+                    color: #2e4040;
+                    text-decoration: line-through;
+                  "
+                >
+                  Write unit tests
+                </td>
+                <td
+                  style="
+                    padding: 6px 8px;
+                    color: #2e4040;
+                    text-decoration: line-through;
+                  "
+                >
+                  #dev
+                </td>
+              </tr>
+              <tr style="border-top: 1px solid #1a2626">
+                <td style="padding: 6px 8px; color: #4ab8b8">4</td>
+                <td style="padding: 6px 8px">
+                  <span class="chip-l">LOW&nbsp;</span>
+                </td>
+                <td style="padding: 6px 8px; color: #e05555">○</td>
+                <td style="padding: 6px 8px; color: #e8e4d9">Update docs</td>
+                <td style="padding: 6px 8px; color: #3a6060">#docs</td>
+              </tr>
+            </table>
+          </div>
           <br />
           <div
             style="
               color: #2e4a4a;
-              font-size: 12px;
+              font-size: 11px;
               display: flex;
               align-items: center;
-              gap: 10px;
-              padding: 0 8px;
+              gap: 6px;
+              padding: 0 4px;
+              flex-wrap: wrap;
             "
           >
             <span style="color: #4dab6e; font-weight: 500">1</span
@@ -1521,89 +1624,104 @@
               <br />
               <div class="rl">──────── ◈ K A N B A N B O A R D ────────</div>
               <br />
-              <div
-                style="
-                  display: grid;
-                  grid-template-columns: 1fr 1fr 1fr;
-                  gap: 8px;
-                  font-size: 12px;
-                "
-              >
-                <div style="border: 1px solid #1a3a2a; padding: 8px">
-                  <div
-                    style="color: #4dab6e; font-size: 11px; margin-bottom: 8px"
-                  >
-                    ○ TO DO (2)
-                  </div>
-                  <div
-                    style="
-                      border: 1px solid #1a3a2a;
-                      padding: 6px 8px;
-                      margin-bottom: 6px;
-                    "
-                  >
-                    <div><span class="chip-h">HIGH</span></div>
-                    <div
-                      style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
-                    >
-                      Fix login bug
-                    </div>
-                    <div style="color: #3a6060; font-size: 11px">#bug</div>
-                  </div>
-                  <div style="border: 1px solid #1a3a2a; padding: 6px 8px">
-                    <div><span class="chip-l">LOW&nbsp;</span></div>
-                    <div
-                      style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
-                    >
-                      Update docs
-                    </div>
-                  </div>
-                </div>
-                <div style="border: 1px solid #3a3a1a; padding: 8px">
-                  <div
-                    style="color: #d4a017; font-size: 11px; margin-bottom: 8px"
-                  >
-                    ◎ IN PROGRESS (1)
-                  </div>
-                  <div style="border: 1px solid #3a3a1a; padding: 6px 8px">
-                    <div><span class="chip-c">CRIT</span></div>
-                    <div
-                      style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
-                    >
-                      Ship v2.0 release
-                    </div>
-                    <div style="color: #3a6060; font-size: 11px">due:Mon</div>
-                  </div>
-                </div>
-                <div style="border: 1px solid #1a3a1a; padding: 8px">
-                  <div
-                    style="color: #4dab6e; font-size: 11px; margin-bottom: 8px"
-                  >
-                    ✓ DONE (1)
-                  </div>
-                  <div
-                    style="
-                      border: 1px solid #1a3a1a;
-                      padding: 6px 8px;
-                      opacity: 0.4;
-                    "
-                  >
-                    <div><span class="chip-m">MED&nbsp;</span></div>
+              <div style="overflow-x: auto; -webkit-overflow-scrolling: touch">
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 8px;
+                    font-size: 12px;
+                    min-width: 340px;
+                  "
+                >
+                  <div style="border: 1px solid #1a3a2a; padding: 8px">
                     <div
                       style="
-                        color: #2e4040;
-                        font-size: 12px;
-                        text-decoration: line-through;
-                        margin-top: 3px;
+                        color: #4dab6e;
+                        font-size: 11px;
+                        margin-bottom: 8px;
                       "
                     >
-                      Write tests
+                      ○ TO DO (2)
+                    </div>
+                    <div
+                      style="
+                        border: 1px solid #1a3a2a;
+                        padding: 6px 8px;
+                        margin-bottom: 6px;
+                      "
+                    >
+                      <div><span class="chip-h">HIGH</span></div>
+                      <div
+                        style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
+                      >
+                        Fix login bug
+                      </div>
+                      <div style="color: #3a6060; font-size: 11px">#bug</div>
+                    </div>
+                    <div style="border: 1px solid #1a3a2a; padding: 6px 8px">
+                      <div><span class="chip-l">LOW&nbsp;</span></div>
+                      <div
+                        style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
+                      >
+                        Update docs
+                      </div>
+                    </div>
+                  </div>
+                  <div style="border: 1px solid #3a3a1a; padding: 8px">
+                    <div
+                      style="
+                        color: #d4a017;
+                        font-size: 11px;
+                        margin-bottom: 8px;
+                      "
+                    >
+                      ◎ IN PROGRESS (1)
+                    </div>
+                    <div style="border: 1px solid #3a3a1a; padding: 6px 8px">
+                      <div><span class="chip-c">CRIT</span></div>
+                      <div
+                        style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
+                      >
+                        Ship v2.0 release
+                      </div>
+                      <div style="color: #3a6060; font-size: 11px">due:Mon</div>
+                    </div>
+                  </div>
+                  <div style="border: 1px solid #1a3a1a; padding: 8px">
+                    <div
+                      style="
+                        color: #4dab6e;
+                        font-size: 11px;
+                        margin-bottom: 8px;
+                      "
+                    >
+                      ✓ DONE (1)
+                    </div>
+                    <div
+                      style="
+                        border: 1px solid #1a3a1a;
+                        padding: 6px 8px;
+                        opacity: 0.4;
+                      "
+                    >
+                      <div><span class="chip-m">MED&nbsp;</span></div>
+                      <div
+                        style="
+                          color: #2e4040;
+                          font-size: 12px;
+                          text-decoration: line-through;
+                          margin-top: 3px;
+                        "
+                      >
+                        Write tests
+                      </div>
                     </div>
                   </div>
                 </div>
+                <br />
               </div>
-              <br />
-              <div style="color: #2e4040; font-size: 12px">
+              <div style="color: #2e4040; font-size: 12px; margin-top: 8px">
                 use: todoc status &lt;id&gt; doing ← move to In Progress
               </div>
             </div>
@@ -1712,7 +1830,7 @@
               <div
                 style="
                   display: grid;
-                  grid-template-columns: 1fr 1fr 1fr 1fr;
+                  grid-template-columns: 1fr 1fr;
                   gap: 6px;
                   margin-bottom: 8px;
                 "
