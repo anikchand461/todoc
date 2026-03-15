@@ -250,36 +250,148 @@ def render_search_results(tasks: List, query: str) -> None:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 def render_stats_panel(
-    total: int, completed: int, pending: int, rate: float,
+    total:       int,
+    completed:   int,
+    pending:     int,
+    rate:        float,
     by_priority: dict | None = None,
+    tasks:       list | None = None,   # full task list for deeper breakdowns
 ) -> None:
-    pct = int(rate)
-    body = Text()
-    body.append("\n")
-    body.append("  Total      ", style=f"bold {DIM}")
-    body.append(f"{total}\n",    style="bold white")
-    body.append("  Done       ", style="bold green")
-    body.append(f"{completed}\n",style="bold white")
-    body.append("  Pending    ", style="bold yellow")
-    body.append(f"{pending}\n\n",style="bold white")
-    body.append("  Progress   ", style="bold cyan")
-    body.append_text(_progress_bar(pct, width=32))
-    body.append(f"  {pct}%\n",  style="bold cyan")
+    """Redesigned stats — full dashboard layout."""
+    from rich.columns import Columns
+    from rich.table   import Table as RTable
+    import math
 
-    if by_priority:
-        body.append("\n  ── by priority ──\n", style=DIM)
-        for lvl in ("critical", "high", "medium", "low"):
-            count = by_priority.get(lvl, 0)
-            if count:
-                body.append("  ")
-                body.append_text(_priority_chip(lvl))
-                body.append(f"  {count} task(s)\n", style=DIM)
-    body.append("\n")
+    pct     = int(rate)
+    bar_w   = 36
+    filled  = int(pct / 100 * bar_w)
+    bar     = Text()
+    bar.append("█" * filled,            style="bold green")
+    bar.append("░" * (bar_w - filled),  style=f"dim {MUTED}")
 
     _spacer()
-    console.print(Panel(body,
-        title="[bold cyan]◈  Statistics[/bold cyan]",
-        border_style="cyan", box=ROUNDED, padding=(0, 3)))
+    _rule(title="[bold cyan]◈  S T A T I S T I C S[/bold cyan]", style="cyan")
+    _spacer()
+
+    # ── Row 1: 4 big metric cards ─────────────────────────────
+    def _metric_card(value: str, label: str, color: str, sub: str = "") -> Panel:
+        body = Text(justify="center")
+        body.append(f"\n  {value}  \n", style=f"bold {color}")
+        body.append(f"  {label}  \n",   style=f"bold {DIM}")
+        if sub:
+            body.append(f"  {sub}  \n", style=f"dim {MUTED}")
+        else:
+            body.append("\n")
+        return Panel(Align.center(body),
+                     border_style=color, box=ROUNDED, padding=(0, 2))
+
+    streak = 0
+    if tasks:
+        # count consecutive done tasks from the end (completion streak)
+        for t in reversed(sorted(tasks, key=lambda x: x.created_at or "")):
+            if t.done: streak += 1
+            else:      break
+
+    cards = [
+        _metric_card(str(total),     "Total Tasks",  "cyan",   "all time"),
+        _metric_card(str(completed), "Completed",    "green",  f"streak: {streak}"),
+        _metric_card(str(pending),   "Pending",      "yellow", "to do"),
+        _metric_card(f"{pct}%",      "Done Rate",    "cyan" if pct >= 50 else "yellow", "completion"),
+    ]
+    console.print(Padding(Columns(cards, equal=True, expand=True), (0, 1)))
+    _spacer()
+
+    # ── Row 2: Progress bar (full width) ─────────────────────
+    prog_body = Text()
+    prog_body.append("\n  Progress  ", style=f"bold {DIM}")
+    prog_body.append_text(bar)
+    prog_body.append(f"  {pct}%", style="bold cyan")
+    if pct == 100:
+        prog_body.append("  🎉 All done!", style="bold green")
+    prog_body.append("\n")
+    console.print(Padding(Panel(prog_body,
+        border_style="grey35", box=box.SIMPLE, padding=(0, 1)), (0, 1)))
+
+    # ── Row 3: Priority breakdown + Status breakdown side by side
+    left_tbl = RTable(
+        title       = "[bold white]By Priority[/bold white]",
+        box         = box.SIMPLE_HEAD,
+        border_style= MUTED,
+        show_lines  = True,
+        padding     = (0, 2),
+        expand      = True,
+    )
+    left_tbl.add_column("Priority",  justify="left",   width=10)
+    left_tbl.add_column("Count",     justify="right",  style="bold white", width=7)
+    left_tbl.add_column("Bar",       justify="left",   ratio=1)
+    left_tbl.add_column("%",         justify="right",  style="dim cyan",   width=6)
+
+    for lvl in ("critical", "high", "medium", "low"):
+        count = (by_priority or {}).get(lvl, 0)
+        if count == 0:
+            continue
+        frac    = count / total if total else 0
+        bar_len = max(1, int(frac * 20))
+        col     = {"critical": "bright_red", "high": "red",
+                   "medium": "yellow", "low": "green"}.get(lvl, "white")
+        mini_bar = Text("█" * bar_len, style=f"bold {col}")
+        left_tbl.add_row(
+            _priority_chip(lvl),
+            str(count),
+            mini_bar,
+            f"{int(frac*100)}%",
+        )
+
+    right_tbl = RTable(
+        title       = "[bold white]By Status[/bold white]",
+        box         = box.SIMPLE_HEAD,
+        border_style= MUTED,
+        show_lines  = True,
+        padding     = (0, 2),
+        expand      = True,
+    )
+    right_tbl.add_column("Status",  justify="left",   width=14)
+    right_tbl.add_column("Count",   justify="right",  style="bold white", width=7)
+    right_tbl.add_column("Bar",     justify="left",   ratio=1)
+
+    if tasks:
+        status_counts = {}
+        for t in tasks:
+            s = t.status if hasattr(t, "status") else ("done" if t.done else "todo")
+            status_counts[s] = status_counts.get(s, 0) + 1
+
+        status_styles = {
+            "todo":  ("○  todo",  "red"),
+            "doing": ("◎  doing", "yellow"),
+            "done":  ("✓  done",  "green"),
+        }
+        for st, (label, col) in status_styles.items():
+            count = status_counts.get(st, 0)
+            frac  = count / total if total else 0
+            mini  = Text("█" * max(1, int(frac * 20)) if count else "", style=f"bold {col}")
+            right_tbl.add_row(
+                Text(label, style=f"bold {col}"),
+                str(count),
+                mini,
+            )
+    else:
+        done_bar  = Text("█" * max(1, int((completed/total if total else 0) * 20)), style="bold green")
+        pend_bar  = Text("█" * max(1, int((pending/total  if total else 0) * 20)), style="bold yellow")
+        right_tbl.add_row(Text("✓  done",    style="bold green"),  str(completed), done_bar)
+        right_tbl.add_row(Text("○  pending", style="bold yellow"), str(pending),   pend_bar)
+
+    console.print(Padding(Columns([left_tbl, right_tbl], equal=True, expand=True), (0, 1)))
+
+    # ── Footer ────────────────────────────────────────────────
+    _spacer()
+    mood = (
+        "🎉 everything done — you crushed it!"   if pct == 100 else
+        "🔥 almost there — keep going!"          if pct >= 75  else
+        "⚡ good progress — stay focused!"       if pct >= 50  else
+        "📋 plenty to do — one task at a time."  if pct >= 25  else
+        "🚀 just getting started — let's go!"
+    )
+    _rule(title=f"[{DIM}]{mood}[/{DIM}]", style=MUTED)
     _spacer()
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -583,4 +695,5 @@ def render_help() -> None:
     _spacer()
     _rule(style=MUTED)
     console.print(
-        f"\n  [{DIM}]Run [bold]todoc <command> --help[/bold] for the raw Typer flag list of any command.[/{DIM}]\n")
+        f"\n  [{DIM}]Run [bold]todoc <command> --help[/bold] for the raw Typer flag list of any command.[/{DIM}]"
+        f"\n  [{DIM}]To get a summary of all commands, type [bold]todoc -s[/bold][/{DIM}]\n")

@@ -39,6 +39,7 @@ classifiers = [
 dependencies = [
     "typer>=0.12",
     "rich>=13",
+    "textual>=0.50",
 ]
 
 # ─────────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ todoc = "todoc.cli.main:app"
 # Optional: project URLs shown on the PyPI sidebar
 # ─────────────────────────────────────────────────────────────
 [project.urls]
-Homepage      = "https://github.com/anikchand461/todoc"
+Homepage      = "https://todocpy.vercel.app"
 Repository    = "https://github.com/anikchand461/todoc"
 "Bug Tracker" = "https://github.com/anikchand461/todoc/issues"
 
@@ -66,6 +67,10 @@ include = ["todoc*"]
 # Dev / test extras  (pip install todoc[dev])
 # ─────────────────────────────────────────────────────────────
 [project.optional-dependencies]
+windows = [
+    "plyer>=2.1",
+]
+macos   = ["pync>=2.0"]
 dev = [
     "pytest>=8",
     "pytest-cov",

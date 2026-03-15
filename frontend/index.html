@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>todoc — terminal task manager</title>
+    <link rel="canonical" href="https://todocpy.vercel.app" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -49,15 +50,12 @@
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
-
-      /* ── Layout ── */
       .wrap {
         max-width: 1160px;
         margin: 0 auto;
         padding: 0 clamp(16px, 4vw, 40px);
       }
 
-      /* ── NAV ── */
       nav {
         position: sticky;
         top: 0;
@@ -112,10 +110,15 @@
         font-size: 13px;
         font-weight: 500;
         transition: color 0.12s;
-        white-space: nowrap;
       }
       .nav-links a:hover {
         color: var(--ink);
+      }
+      .nav-btns {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
       }
       .nav-cta {
         background: var(--ink);
@@ -152,13 +155,6 @@
       .nav-gh:hover {
         border-color: var(--ink);
       }
-      .nav-btns {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-shrink: 0;
-      }
-      /* hide nav links on small screens, keep buttons */
       @media (max-width: 640px) {
         .nav-links {
           display: none;
@@ -170,7 +166,6 @@
         }
       }
 
-      /* ── HERO ── */
       #hero {
         border-bottom: 1.5px solid var(--ink);
         display: grid;
@@ -366,7 +361,6 @@
         border-color: #2c7a2c;
       }
 
-      /* Hero right (terminal) */
       .hero-right {
         background: var(--ink);
         display: flex;
@@ -417,12 +411,6 @@
       .tc {
         color: #e8e4d9;
       }
-      .tf {
-        color: #5a7a6a;
-      }
-      .ta {
-        color: #d4a017;
-      }
       .chip-c {
         background: #c0392b;
         color: #fff;
@@ -456,7 +444,6 @@
         font-size: 12px;
       }
 
-      /* ── STATS BAR ── */
       .stats-bar {
         border-bottom: 1.5px solid var(--ink);
         display: grid;
@@ -465,11 +452,6 @@
       @media (max-width: 700px) {
         .stats-bar {
           grid-template-columns: 1fr 1fr;
-        }
-      }
-      @media (max-width: 360px) {
-        .stats-bar {
-          grid-template-columns: 1fr;
         }
       }
       .sc {
@@ -505,7 +487,6 @@
         font-weight: 500;
       }
 
-      /* ── SECTIONS ── */
       .sec {
         padding: clamp(52px, 8vw, 88px) 0;
         border-bottom: 1.5px solid var(--rule2);
@@ -537,7 +518,6 @@
         line-height: 1.65;
       }
 
-      /* ── DEMO ── */
       #demo .di {
         display: grid;
         grid-template-columns: 180px 1fr;
@@ -609,7 +589,6 @@
           border-left: none;
           border-bottom: 3px solid transparent;
           flex-shrink: 0;
-          font-size: 11.5px;
           padding: 10px 14px;
         }
         .dtab.on {
@@ -636,7 +615,7 @@
         width: 100%;
         border-collapse: collapse;
         margin: 4px 0;
-        min-width: 400px;
+        min-width: 380px;
       }
       .dt th {
         font-size: 11px;
@@ -713,6 +692,9 @@
       .pan.inf {
         border-color: #1a3a4a;
       }
+      .pan.nt {
+        border-color: #4a1a4a;
+      }
       .pt {
         font-size: 12px;
         font-weight: 500;
@@ -728,6 +710,9 @@
       .pan.inf .pt {
         color: #4ab8b8;
       }
+      .pan.nt .pt {
+        color: #c060c0;
+      }
       .pr {
         display: flex;
         gap: 10px;
@@ -737,13 +722,12 @@
       }
       .pl {
         color: #2e4040;
-        min-width: 70px;
+        min-width: 76px;
       }
       .pv {
         color: #c8d4d4;
       }
 
-      /* ── FEATURES ── */
       #features .fg {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -810,7 +794,6 @@
         font-size: 11.5px;
       }
 
-      /* ── COMMANDS ── */
       #commands .cl {
         display: grid;
         grid-template-columns: 1fr 340px;
@@ -865,11 +848,6 @@
         background: var(--paper2);
         border: 1.5px solid var(--ink);
       }
-      @media (max-width: 960px) {
-        .fb {
-          position: static;
-        }
-      }
       @media (min-width: 960px) {
         .fb {
           position: sticky;
@@ -915,7 +893,6 @@
         white-space: nowrap;
       }
 
-      /* ── INSTALL ── */
       #install .il2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1018,7 +995,6 @@
       }
       .iln .c {
         color: #e8e4d9;
-        word-break: break-all;
       }
       .io {
         font-size: 11.5px;
@@ -1037,7 +1013,6 @@
         height: 8px;
       }
 
-      /* ── FOOTER ── */
       footer {
         background: var(--ink);
         color: var(--paper);
@@ -1147,7 +1122,6 @@
         color: #3a4848;
       }
 
-      /* ── Animations ── */
       .reveal {
         opacity: 0;
         transform: translateY(20px);
@@ -1189,7 +1163,7 @@
             >GitHub ↗</a
           >
           <a
-            href="https://pypi.org/project/todoc/0.1.0/"
+            href="https://pypi.org/project/todoc/"
             target="_blank"
             class="nav-cta"
             >PyPI ↗</a
@@ -1225,8 +1199,11 @@
         </h1>
         <p class="hero-desc">
           Fast, beautiful, and built entirely in your shell.
-          <strong>No apps. No accounts. No configuration.</strong> Just a
-          command and your tasks.
+          <strong
+            >TUI dashboard, Kanban board, fuzzy search, auto
+            notifications.</strong
+          >
+          No apps. No accounts.
         </p>
         <div class="hero-actions">
           <a href="#install" class="btn-ink">Get started →</a>
@@ -1258,7 +1235,7 @@
             <tr style="color: #2e4a4a; font-size: 11.5px">
               <td style="padding: 4px 8px; width: 32px">#</td>
               <td style="padding: 4px 8px; width: 80px">Priority</td>
-              <td style="padding: 4px 8px; width: 24px"></td>
+              <td style="padding: 4px 8px; width: 24px">St</td>
               <td style="padding: 4px 8px">Task</td>
               <td style="padding: 4px 8px">Tags</td>
             </tr>
@@ -1283,15 +1260,6 @@
               <td style="padding: 6px 8px">
                 <span class="chip-m">MED&nbsp;</span>
               </td>
-              <td style="padding: 6px 8px; color: #e05555">○</td>
-              <td style="padding: 6px 8px; color: #e8e4d9">Write unit tests</td>
-              <td style="padding: 6px 8px; color: #3a6060">#dev</td>
-            </tr>
-            <tr style="border-top: 1px solid #1a2626; opacity: 0.4">
-              <td style="padding: 6px 8px; color: #2e4040">4</td>
-              <td style="padding: 6px 8px">
-                <span class="chip-l">LOW&nbsp;</span>
-              </td>
               <td style="padding: 6px 8px; color: #4dab6e">✓</td>
               <td
                 style="
@@ -1300,7 +1268,7 @@
                   text-decoration: line-through;
                 "
               >
-                Update README
+                Write unit tests
               </td>
               <td
                 style="
@@ -1309,8 +1277,17 @@
                   text-decoration: line-through;
                 "
               >
-                #docs
+                #dev
               </td>
+            </tr>
+            <tr style="border-top: 1px solid #1a2626">
+              <td style="padding: 6px 8px; color: #4ab8b8">4</td>
+              <td style="padding: 6px 8px">
+                <span class="chip-l">LOW&nbsp;</span>
+              </td>
+              <td style="padding: 6px 8px; color: #e05555">○</td>
+              <td style="padding: 6px 8px; color: #e8e4d9">Update docs</td>
+              <td style="padding: 6px 8px; color: #3a6060">#docs</td>
             </tr>
           </table>
           <br />
@@ -1340,7 +1317,7 @@
 
     <div class="stats-bar reveal">
       <div class="sc">
-        <div class="sn"><em>16</em></div>
+        <div class="sn"><em>21</em></div>
         <div class="sl">commands available</div>
       </div>
       <div class="sc">
@@ -1348,12 +1325,12 @@
         <div class="sl">priority levels</div>
       </div>
       <div class="sc">
-        <div class="sn">0</div>
-        <div class="sl">config required</div>
+        <div class="sn"><em>3</em></div>
+        <div class="sl">platforms supported</div>
       </div>
       <div class="sc">
-        <div class="sn"><em>Python</em></div>
-        <div class="sl">3.10+ required</div>
+        <div class="sn">0</div>
+        <div class="sl">config required</div>
       </div>
     </div>
 
@@ -1370,14 +1347,16 @@
         <div class="di reveal" style="transition-delay: 0.1s">
           <div class="dnav">
             <div class="dnav-t">Commands</div>
-            <div class="dtab on" onclick="st('list', this)">📋 todoc list</div>
-            <div class="dtab" onclick="st('add', this)">➕ todoc add</div>
-            <div class="dtab" onclick="st('done', this)">✅ todoc done</div>
-            <div class="dtab" onclick="st('edit', this)">✏️ todoc edit</div>
-            <div class="dtab" onclick="st('search', this)">🔎 todoc search</div>
-            <div class="dtab" onclick="st('stats', this)">📊 todoc stats</div>
-            <div class="dtab" onclick="st('export', this)">📤 todoc export</div>
-            <div class="dtab" onclick="st('reset', this)">💥 todoc reset</div>
+            <div class="dtab on" onclick="st('list', this)">📋 list</div>
+            <div class="dtab" onclick="st('add', this)">➕ add</div>
+            <div class="dtab" onclick="st('done', this)">✅ done</div>
+            <div class="dtab" onclick="st('board', this)">◎ board</div>
+            <div class="dtab" onclick="st('subtask', this)">↳ subtask</div>
+            <div class="dtab" onclick="st('search', this)">🔎 search</div>
+            <div class="dtab" onclick="st('stats', this)">📊 stats</div>
+            <div class="dtab" onclick="st('notify', this)">🔔 notify</div>
+            <div class="dtab" onclick="st('daemon', this)">⚙ daemon</div>
+            <div class="dtab" onclick="st('export', this)">📤 export</div>
           </div>
           <div class="dpane">
             <div class="scene on" id="sc-list">
@@ -1395,7 +1374,7 @@
                 <tr>
                   <th>#</th>
                   <th>Priority</th>
-                  <th></th>
+                  <th>St</th>
                   <th>Task</th>
                   <th>Tags</th>
                 </tr>
@@ -1441,7 +1420,7 @@
               <div>
                 <span class="tp">$</span>
                 <span class="tc"
-                  >todoc add <span class="ta">"Fix login bug"</span>
+                  >todoc add <span style="color: #d4a017">"Fix login bug"</span>
                   <span style="color: #5a7a6a"
                     >-p high --tags "#bug"</span
                   ></span
@@ -1471,9 +1450,9 @@
               <div>
                 <span class="tp">$</span>
                 <span class="tc"
-                  >todoc add <span class="ta">"Team retro"</span>
+                  >todoc add <span style="color: #d4a017">"Ship v2"</span>
                   <span style="color: #5a7a6a"
-                    >--tags "@alice fri 3pm"</span
+                    >-p critical --tags "due:Mon"</span
                   ></span
                 >
               </div>
@@ -1485,15 +1464,15 @@
                   ><span class="pv" style="color: #4ab8b8">6</span>
                 </div>
                 <div class="pr">
-                  <span class="pl">task</span><span class="pv">Team retro</span>
+                  <span class="pl">task</span><span class="pv">Ship v2</span>
                 </div>
                 <div class="pr">
                   <span class="pl">priority</span
-                  ><span class="pv"><span class="chip-m">MED&nbsp;</span></span>
+                  ><span class="pv"><span class="chip-c">CRIT</span></span>
                 </div>
                 <div class="pr">
                   <span class="pl">tags</span
-                  ><span class="pv" style="color: #4ab8b8">@alice fri 3pm</span>
+                  ><span class="pv" style="color: #4ab8b8">due:Mon</span>
                 </div>
               </div>
             </div>
@@ -1501,7 +1480,9 @@
             <div class="scene" id="sc-done">
               <div>
                 <span class="tp">$</span>
-                <span class="tc">todoc done <span class="ta">1 3</span></span>
+                <span class="tc"
+                  >todoc done <span style="color: #d4a017">1 3</span></span
+                >
               </div>
               <br />
               <div class="pan ok">
@@ -1527,54 +1508,133 @@
                 </div>
               </div>
               <br />
-              <div>
-                <span class="tp">$</span>
-                <span class="tc"
-                  >todoc list
-                  <span style="color: #5a7a6a">--pending</span></span
-                >
-              </div>
-              <br />
-              <table class="dt">
-                <tr>
-                  <th>#</th>
-                  <th>Priority</th>
-                  <th></th>
-                  <th>Task</th>
-                  <th>Tags</th>
-                </tr>
-                <tr>
-                  <td class="di2">2</td>
-                  <td><span class="chip-h">HIGH</span></td>
-                  <td style="color: #e05555; text-align: center">○</td>
-                  <td>Fix login bug</td>
-                  <td style="color: #3a6060; font-size: 12px">#bug</td>
-                </tr>
-                <tr>
-                  <td class="di2">4</td>
-                  <td><span class="chip-l">LOW&nbsp;</span></td>
-                  <td style="color: #e05555; text-align: center">○</td>
-                  <td>Team retro</td>
-                  <td style="color: #3a6060; font-size: 12px">@alice</td>
-                </tr>
-              </table>
-              <div class="pbw">
-                <span class="dn">2</span><span>/4 done ·</span
-                ><span class="pn">2</span><span>pending ·</span
-                ><span class="pc">50%</span
-                ><span class="pbg">██████████████</span
-                ><span class="pbe">██████████████</span>
+              <div style="color: #2e4040; font-size: 12px">
+                tip: todoc done 1 2 5 ← bulk complete multiple at once
               </div>
             </div>
 
-            <div class="scene" id="sc-edit">
+            <div class="scene" id="sc-board">
+              <div>
+                <span class="tp">$</span> <span class="tc">todoc board</span>
+              </div>
+              <br />
+              <div class="rl">──────── ◈ K A N B A N B O A R D ────────</div>
+              <br />
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr 1fr;
+                  gap: 8px;
+                  font-size: 12px;
+                "
+              >
+                <div style="border: 1px solid #1a3a2a; padding: 8px">
+                  <div
+                    style="color: #4dab6e; font-size: 11px; margin-bottom: 8px"
+                  >
+                    ○ TO DO (2)
+                  </div>
+                  <div
+                    style="
+                      border: 1px solid #1a3a2a;
+                      padding: 6px 8px;
+                      margin-bottom: 6px;
+                    "
+                  >
+                    <div><span class="chip-h">HIGH</span></div>
+                    <div
+                      style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
+                    >
+                      Fix login bug
+                    </div>
+                    <div style="color: #3a6060; font-size: 11px">#bug</div>
+                  </div>
+                  <div style="border: 1px solid #1a3a2a; padding: 6px 8px">
+                    <div><span class="chip-l">LOW&nbsp;</span></div>
+                    <div
+                      style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
+                    >
+                      Update docs
+                    </div>
+                  </div>
+                </div>
+                <div style="border: 1px solid #3a3a1a; padding: 8px">
+                  <div
+                    style="color: #d4a017; font-size: 11px; margin-bottom: 8px"
+                  >
+                    ◎ IN PROGRESS (1)
+                  </div>
+                  <div style="border: 1px solid #3a3a1a; padding: 6px 8px">
+                    <div><span class="chip-c">CRIT</span></div>
+                    <div
+                      style="color: #e8e4d9; font-size: 12px; margin-top: 3px"
+                    >
+                      Ship v2.0 release
+                    </div>
+                    <div style="color: #3a6060; font-size: 11px">due:Mon</div>
+                  </div>
+                </div>
+                <div style="border: 1px solid #1a3a1a; padding: 8px">
+                  <div
+                    style="color: #4dab6e; font-size: 11px; margin-bottom: 8px"
+                  >
+                    ✓ DONE (1)
+                  </div>
+                  <div
+                    style="
+                      border: 1px solid #1a3a1a;
+                      padding: 6px 8px;
+                      opacity: 0.4;
+                    "
+                  >
+                    <div><span class="chip-m">MED&nbsp;</span></div>
+                    <div
+                      style="
+                        color: #2e4040;
+                        font-size: 12px;
+                        text-decoration: line-through;
+                        margin-top: 3px;
+                      "
+                    >
+                      Write tests
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">
+                use: todoc status &lt;id&gt; doing ← move to In Progress
+              </div>
+            </div>
+
+            <div class="scene" id="sc-subtask">
               <div>
                 <span class="tp">$</span>
                 <span class="tc"
-                  >todoc edit <span class="ta">2</span>
-                  <span style="color: #5a7a6a"
-                    >-p critical --tags "#bug urgent"</span
-                  ></span
+                  >todoc subtask <span style="color: #d4a017">1</span>
+                  <span style="color: #d4a017">"Write changelog"</span>
+                  <span style="color: #5a7a6a">-p medium</span></span
+                >
+              </div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">✓ Subtask added</div>
+                <div class="pr">
+                  <span class="pl">parent</span
+                  ><span class="pv" style="color: #4ab8b8">#1</span>
+                </div>
+                <div class="pr">
+                  <span class="pl">subtask</span
+                  ><span class="pv" style="color: #4ab8b8"
+                    >#5 Write changelog</span
+                  >
+                </div>
+              </div>
+              <br />
+              <div>
+                <span class="tp">$</span>
+                <span class="tc"
+                  >todoc show <span style="color: #d4a017">1</span></span
                 >
               </div>
               <br />
@@ -1587,29 +1647,22 @@
                     margin-bottom: 10px;
                   "
                 >
-                  ◈ Task #2
-                </div>
-                <div class="pr">
-                  <span class="pl">status</span
-                  ><span class="pv" style="color: #e05555">○ pending</span>
+                  ◈ Task #1
                 </div>
                 <div class="pr">
                   <span class="pl">priority</span
                   ><span class="pv"><span class="chip-c">CRIT</span></span>
                 </div>
                 <div class="pr">
-                  <span class="pl">tags</span
-                  ><span class="pv" style="color: #4ab8b8">#bug urgent</span>
-                </div>
-                <div class="pr">
                   <span class="pl">description</span
-                  ><span class="pv">Fix login bug on mobile</span>
+                  ><span class="pv">Ship v2.0 release</span>
                 </div>
               </div>
-              <br />
-              <div style="color: #4dab6e; font-size: 12px">
-                <span style="background: #1a4a2a; padding: 2px 8px">✓ OK</span>
-                Task #2 updated.
+              <div style="color: #c8d4d4; font-size: 12px; margin-top: 8px">
+                subtasks (1):
+              </div>
+              <div style="color: #5a7a6a; font-size: 12px; padding-left: 16px">
+                #5 Write changelog <span style="color: #2e4040">medium</span>
               </div>
             </div>
 
@@ -1617,40 +1670,36 @@
               <div>
                 <span class="tp">$</span>
                 <span class="tc"
-                  >todoc search <span class="ta">"#bug"</span></span
+                  >todoc search <span style="color: #d4a017">"lgin"</span>
+                  <span style="color: #5a7a6a">--fuzzy</span></span
                 >
               </div>
               <br />
-              <div class="rl">── ◈ Search · "#bug" · 2 result(s) ──</div>
+              <div class="rl">── ◈ Search · "lgin" --fuzzy · 1 result ──</div>
               <br />
               <table class="dt">
                 <tr>
                   <th>#</th>
                   <th>Priority</th>
-                  <th></th>
+                  <th>St</th>
                   <th>Task</th>
                   <th>Tags</th>
                 </tr>
                 <tr>
                   <td class="di2" style="text-decoration: underline">2</td>
-                  <td><span class="chip-c">CRIT</span></td>
+                  <td><span class="chip-h">HIGH</span></td>
                   <td style="color: #e05555; text-align: center">○</td>
                   <td>Fix login bug</td>
                   <td style="color: #3a6060; font-size: 12px">#bug #backend</td>
                 </tr>
-                <tr>
-                  <td class="di2" style="text-decoration: underline">7</td>
-                  <td><span class="chip-m">MED&nbsp;</span></td>
-                  <td style="color: #e05555; text-align: center">○</td>
-                  <td>Fix pagination bug</td>
-                  <td style="color: #3a6060; font-size: 12px">
-                    #bug #frontend
-                  </td>
-                </tr>
               </table>
               <br />
-              <div style="color: #1e3030; font-size: 12px; padding: 0 8px">
-                ── 2 match(es) for "#bug" ──
+              <div style="color: #4ab8b8; font-size: 12px; padding: 2px 8px">
+                ℹ Fuzzy search — results ranked by match quality.
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">
+                tip: "lgin" matched "login" — typos are OK with --fuzzy
               </div>
             </div>
 
@@ -1659,61 +1708,171 @@
                 <span class="tp">$</span> <span class="tc">todoc stats</span>
               </div>
               <br />
-              <div class="pan inf">
-                <div class="pt">◈ Statistics</div>
-                <div class="pr">
-                  <span class="pl" style="color: #2e4040">Total</span
-                  ><span class="pv">8</span>
-                </div>
-                <div class="pr">
-                  <span class="pl" style="color: #4dab6e">Done</span
-                  ><span class="pv">3</span>
-                </div>
-                <div class="pr">
-                  <span class="pl" style="color: #d4a017">Pending</span
-                  ><span class="pv">5</span>
-                </div>
-                <div style="height: 8px"></div>
-                <div class="pr">
-                  <span class="pl" style="color: #4ab8b8">Progress</span
-                  ><span
-                    ><span class="pbg">████████████</span
-                    ><span class="pbe">████████████████████</span
-                    ><span style="color: #4ab8b8; margin-left: 8px"
-                      >38%</span
-                    ></span
-                  >
-                </div>
-                <div style="height: 8px"></div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr 1fr 1fr;
+                  gap: 6px;
+                  margin-bottom: 8px;
+                "
+              >
                 <div
-                  style="color: #2e4040; font-size: 12px; margin-bottom: 8px"
+                  style="
+                    border: 1px solid #1a3a4a;
+                    padding: 8px;
+                    text-align: center;
+                  "
                 >
-                  ── by priority ──
+                  <div
+                    style="color: #4ab8b8; font-size: 18px; font-weight: bold"
+                  >
+                    8
+                  </div>
+                  <div style="color: #2e4040; font-size: 11px">Total</div>
+                </div>
+                <div
+                  style="
+                    border: 1px solid #1a4a2a;
+                    padding: 8px;
+                    text-align: center;
+                  "
+                >
+                  <div
+                    style="color: #4dab6e; font-size: 18px; font-weight: bold"
+                  >
+                    3
+                  </div>
+                  <div style="color: #2e4040; font-size: 11px">Done</div>
+                </div>
+                <div
+                  style="
+                    border: 1px solid #3a3800;
+                    padding: 8px;
+                    text-align: center;
+                  "
+                >
+                  <div
+                    style="color: #d4a017; font-size: 18px; font-weight: bold"
+                  >
+                    5
+                  </div>
+                  <div style="color: #2e4040; font-size: 11px">Pending</div>
+                </div>
+                <div
+                  style="
+                    border: 1px solid #1a3a4a;
+                    padding: 8px;
+                    text-align: center;
+                  "
+                >
+                  <div
+                    style="color: #4ab8b8; font-size: 18px; font-weight: bold"
+                  >
+                    38%
+                  </div>
+                  <div style="color: #2e4040; font-size: 11px">Done rate</div>
+                </div>
+              </div>
+              <div
+                style="
+                  border: 1px solid #1e2828;
+                  padding: 8px 12px;
+                  font-size: 12px;
+                  color: #2e4040;
+                "
+              >
+                Progress
+                <span style="color: #4dab6e; letter-spacing: -1px"
+                  >████████████</span
+                ><span style="color: #1e2828; letter-spacing: -1px"
+                  >████████████████████</span
+                >
+                <span style="color: #4ab8b8">38%</span>
+              </div>
+              <br />
+              <div
+                style="color: #2e4040; font-size: 11.5px; margin-bottom: 6px"
+              >
+                ── by priority ──
+              </div>
+              <div style="font-size: 12px">
+                <span class="chip-c">CRIT</span
+                ><span style="color: #2e4040; margin-left: 8px">2 tasks</span>
+              </div>
+              <div style="font-size: 12px; margin-top: 4px">
+                <span class="chip-h">HIGH</span
+                ><span style="color: #2e4040; margin-left: 8px">3 tasks</span>
+              </div>
+              <div style="font-size: 12px; margin-top: 4px">
+                <span class="chip-m">MED&nbsp;</span
+                ><span style="color: #2e4040; margin-left: 8px">2 tasks</span>
+              </div>
+              <div style="font-size: 12px; margin-top: 4px">
+                <span class="chip-l">LOW&nbsp;</span
+                ><span style="color: #2e4040; margin-left: 8px">1 task</span>
+              </div>
+            </div>
+
+            <div class="scene" id="sc-notify">
+              <div>
+                <span class="tp">$</span> <span class="tc">todoc notify</span>
+              </div>
+              <br />
+              <div class="pan nt">
+                <div class="pt">⚠ Notified — 2 urgent task(s)</div>
+                <div class="pr">
+                  <span class="pl">#1</span
+                  ><span class="pv">Ship v2.0 release</span>
                 </div>
                 <div class="pr">
-                  <span><span class="chip-c">CRIT</span></span
-                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
-                    >2 task(s)</span
+                  <span class="pl">#2</span
+                  ><span class="pv">Fix login bug</span>
+                </div>
+                <div class="pr" style="margin-top: 8px">
+                  <span class="pv" style="color: #2e4040; font-size: 12px"
+                    >Desktop notification sent.</span
                   >
                 </div>
-                <div class="pr">
-                  <span><span class="chip-h">HIGH</span></span
-                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
-                    >3 task(s)</span
-                  >
-                </div>
-                <div class="pr">
-                  <span><span class="chip-m">MED&nbsp;</span></span
-                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
-                    >2 task(s)</span
-                  >
-                </div>
-                <div class="pr">
-                  <span><span class="chip-l">LOW&nbsp;</span></span
-                  ><span class="pv" style="color: #2e4040; margin-left: 10px"
-                    >1 task(s)</span
-                  >
-                </div>
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">
+                Auto-fires at: 4h · 6h · 9h · 12h · 18h · 24h for pending tasks
+              </div>
+            </div>
+
+            <div class="scene" id="sc-daemon">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc">todoc daemon start</span>
+              </div>
+              <br />
+              <div style="color: #4dab6e; font-size: 12.5px">
+                ✓ Plist written → ~/Library/LaunchAgents/com.todoc.notify.plist
+              </div>
+              <div style="color: #4dab6e; font-size: 12.5px">
+                ✓ Daemon loaded — runs every 30 min
+              </div>
+              <div style="color: #4dab6e; font-size: 12.5px">
+                ✓ Notifications fire at 4h, 6h, 9h, 12h, 18h, 24h
+              </div>
+              <br />
+              <div>
+                <span class="tp">$</span>
+                <span class="tc">todoc daemon status</span>
+              </div>
+              <br />
+              <div style="color: #4dab6e; font-size: 12.5px">
+                ✓ Platform: Darwin · Check interval: every 30 min
+              </div>
+              <div style="color: #4dab6e; font-size: 12.5px">
+                ✓ Notify milestones: [4, 6, 9, 12, 18, 24] hours
+              </div>
+              <div style="color: #4dab6e; font-size: 12.5px">
+                ✓ Daemon is RUNNING
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">
+                macOS · Linux (systemd/cron) · Windows (Task Scheduler)
               </div>
             </div>
 
@@ -1757,38 +1916,8 @@
               </div>
               <br />
               <div style="color: #2e4040; font-size: 12px">
-                backup.json — full fidelity JSON, perfect for backups<br />tasks.csv
-                — opens in Excel / Google Sheets directly
-              </div>
-            </div>
-
-            <div class="scene" id="sc-reset">
-              <div>
-                <span class="tp">$</span> <span class="tc">todoc reset</span>
-              </div>
-              <br />
-              <div style="color: #e05555; margin: 4px 0">
-                ⚠ This will permanently delete all 8 task(s).
-              </div>
-              <div style="color: #2e4040; font-size: 12px; margin-bottom: 12px">
-                This cannot be undone. Run todoc export first to back up.
-              </div>
-              <div style="color: #c8d4d4">
-                Delete everything? [y/N]: <span style="color: #d4a017">y</span>
-              </div>
-              <br />
-              <div class="pan wa">
-                <div class="pt">Reset complete</div>
-                <div class="pr">
-                  <span class="pv" style="color: #e05555; font-weight: 500"
-                    >8</span
-                  ><span class="pv"> task(s) deleted.</span>
-                </div>
-                <div class="pr">
-                  <span class="pv" style="color: #2e4040; font-size: 12px"
-                    >todoc is now empty.</span
-                  >
-                </div>
+                backup.json → full fidelity, ideal for backups<br />tasks.csv →
+                opens directly in Excel / Google Sheets
               </div>
             </div>
           </div>
@@ -1805,54 +1934,55 @@
         <div class="fg">
           <div class="fc reveal">
             <div class="fn">01</div>
-            <div class="ft">Zero configuration</div>
+            <div class="ft">Interactive TUI</div>
             <p class="fd">
-              Install and go. Tasks live in <code>~/.todoc/tasks.json</code> —
-              plain JSON on your machine. No accounts, no sync, no setup wizard.
+              Full keyboard-driven dashboard via <code>todoc tui</code>. Add,
+              edit, search, and manage tasks without typing any commands. Built
+              with Textual.
             </p>
           </div>
           <div class="fc reveal" style="transition-delay: 0.05s">
             <div class="fn">02</div>
-            <div class="ft">Beautiful Rich output</div>
+            <div class="ft">Kanban Board</div>
             <p class="fd">
-              Every command renders polished tables with priority chips, ASCII
-              progress bars, and consistent panel feedback via
-              <code>Rich</code>.
+              Visual <code>todoc board</code> with To Do / In Progress / Done
+              columns. Move tasks with
+              <code>todoc status &lt;id&gt; doing</code>.
             </p>
           </div>
           <div class="fc reveal" style="transition-delay: 0.1s">
             <div class="fn">03</div>
-            <div class="ft">Free-form Tags column</div>
+            <div class="ft">Fuzzy Search</div>
             <p class="fd">
-              The Tags field is entirely yours. Store <code>#hashtags</code>,
-              due dates, links, names, ticket IDs — any text. No enforced
-              structure.
+              Type <code>todoc search "lgin" --fuzzy</code> and it finds "Fix
+              login bug". Typo-tolerant matching ranked by quality score.
             </p>
           </div>
           <div class="fc reveal" style="transition-delay: 0.15s">
             <div class="fn">04</div>
-            <div class="ft">Bulk operations</div>
+            <div class="ft">Auto Notifications</div>
             <p class="fd">
-              Mark multiple tasks done at once: <code>todoc done 1 4 7</code>.
-              Done tasks stay visible with strikethrough so progress is always
-              clear.
+              <code>todoc daemon start</code> installs a background scheduler.
+              Fires at 4h, 6h, 9h, 12h, 18h, 24h. Works on macOS, Linux, Windows
+              — no terminal needed.
             </p>
           </div>
           <div class="fc reveal" style="transition-delay: 0.2s">
             <div class="fn">05</div>
-            <div class="ft">Full-text search</div>
+            <div class="ft">Subtasks</div>
             <p class="fd">
-              Search description and tags instantly.
-              <code>todoc search "#bug"</code> finds every match. Partial words
-              included, case-insensitive.
+              Break tasks into steps with <code>todoc subtask 1 "sub"</code>.
+              Subtasks appear under their parent in <code>todoc show</code>.
+              Deleting parent removes all children.
             </p>
           </div>
           <div class="fc reveal" style="transition-delay: 0.25s">
             <div class="fn">06</div>
-            <div class="ft">Export to JSON &amp; CSV</div>
+            <div class="ft">Zero Config</div>
             <p class="fd">
-              Back up with <code>todoc export -o backup.json</code> or use
-              <code>--format csv</code> to open tasks in Excel or Google Sheets.
+              Install and go. Everything stored in
+              <code>~/.todoc/tasks.json</code>. No accounts, no cloud, no setup.
+              Export to JSON or CSV anytime.
             </p>
           </div>
         </div>
@@ -1876,7 +2006,7 @@
               "
               >todoc help</code
             >
-            for the full reference, or
+            for the full reference or
             <code
               style="
                 color: var(--amber);
@@ -1885,9 +2015,9 @@
                 font-family: var(--mono);
                 font-size: 13px;
               "
-              >todoc --summary</code
+              >todoc -s</code
             >
-            for a quick cheat sheet.
+            for a compact cheat sheet.
           </p>
         </div>
         <div class="cl">
@@ -1906,12 +2036,16 @@
               </div>
               <div class="crow">
                 <span class="cn">show</span
-                ><span class="cd">Full detail panel for a single task</span>
+                ><span class="cd">Full detail + subtasks for one task</span>
               </div>
               <div class="crow">
                 <span class="cn">search</span
                 ><span class="cd"
-                  >Full-text search across description and tags</span
+                  >Full-text search +
+                  <code style="font-size: 11px; color: var(--amber)"
+                    >--fuzzy</code
+                  >
+                  typo-tolerant mode</span
                 >
               </div>
               <div class="crow">
@@ -1923,7 +2057,19 @@
               <div class="crow">
                 <span class="cn">stats</span
                 ><span class="cd"
-                  >Completion statistics + priority breakdown</span
+                  >Dashboard: counts, progress bar, priority & status</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">board</span
+                ><span class="cd"
+                  >Kanban board — To Do / In Progress / Done</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">tui</span
+                ><span class="cd"
+                  >Interactive keyboard-driven TUI dashboard</span
                 >
               </div>
             </div>
@@ -1932,12 +2078,12 @@
               <div class="crow">
                 <span class="cn">done</span
                 ><span class="cd"
-                  >Mark one or more tasks complete — bulk supported</span
+                  >Mark one or more tasks complete (bulk supported)</span
                 >
               </div>
               <div class="crow">
                 <span class="cn">undone</span
-                ><span class="cd">Reopen a completed task back to pending</span>
+                ><span class="cd">Reopen a completed task</span>
               </div>
               <div class="crow">
                 <span class="cn">edit</span
@@ -1946,29 +2092,49 @@
                 >
               </div>
               <div class="crow">
+                <span class="cn">status</span
+                ><span class="cd">Move task between Kanban columns</span>
+              </div>
+              <div class="crow">
+                <span class="cn">subtask</span
+                ><span class="cd">Add a subtask under a parent task</span>
+              </div>
+              <div class="crow">
                 <span class="cn">delete</span
-                ><span class="cd">Remove a single task with confirmation</span>
+                ><span class="cd"
+                  >Remove a task (also removes its subtasks)</span
+                >
               </div>
               <div class="crow">
                 <span class="cn">clear</span
-                ><span class="cd">Remove all completed tasks at once</span>
+                ><span class="cd">Remove all completed tasks</span>
               </div>
               <div class="crow">
                 <span class="cn">reset</span
-                ><span class="cd red"
-                  >Wipe every task — complete reset, cannot be undone</span
-                >
+                ><span class="cd red">Wipe every task — complete reset</span>
               </div>
             </div>
             <div>
-              <div class="cg-lbl">Import &amp; Export</div>
+              <div class="cg-lbl">Notifications &amp; I/O</div>
+              <div class="crow">
+                <span class="cn">notify</span
+                ><span class="cd"
+                  >Fire desktop notification for urgent tasks now</span
+                >
+              </div>
+              <div class="crow">
+                <span class="cn">daemon</span
+                ><span class="cd"
+                  >Background scheduler — auto-notify at 4h…24h</span
+                >
+              </div>
               <div class="crow">
                 <span class="cn">export</span
-                ><span class="cd">Save tasks to JSON or CSV file</span>
+                ><span class="cd">Save tasks to JSON or CSV</span>
               </div>
               <div class="crow">
                 <span class="cn">import</span
-                ><span class="cd">Load tasks back from a JSON backup</span>
+                ><span class="cd">Restore tasks from a JSON backup</span>
               </div>
               <div class="crow">
                 <span class="cn">help</span
@@ -1988,7 +2154,7 @@
               </div>
               <div class="fr">
                 <span class="fnm">--tags</span
-                ><span class="fds">Free-form info column</span>
+                ><span class="fds">Free-form info field</span>
               </div>
               <div class="fr">
                 <span class="fnm">--pending</span
@@ -2005,7 +2171,11 @@
               </div>
               <div class="fr">
                 <span class="fnm">--desc</span
-                ><span class="fds">Reverse the sort order</span>
+                ><span class="fds">Reverse sort order</span>
+              </div>
+              <div class="fr">
+                <span class="fnm">--fuzzy / -f</span
+                ><span class="fds">Fuzzy search mode</span>
               </div>
               <div class="fr">
                 <span class="fnm">--force / -f</span
@@ -2013,15 +2183,15 @@
               </div>
               <div class="fr">
                 <span class="fnm">--format</span
-                ><span class="fds">Export format: json or csv</span
+                ><span class="fds">Export: json or csv</span
                 ><span class="fdf">json</span>
               </div>
               <div class="fr">
                 <span class="fnm">-o / --output</span
-                ><span class="fds">Write export to a file</span>
+                ><span class="fds">Write export to file</span>
               </div>
               <div class="fr">
-                <span class="fnm">--summary / -s</span
+                <span class="fnm">-s / --summary</span
                 ><span class="fds">Compact command cheat sheet</span>
               </div>
             </div>
@@ -2094,15 +2264,28 @@
               <div class="is">
                 <div class="isn">3</div>
                 <div>
-                  <div class="ist-t">Explore the reference</div>
+                  <div class="ist-t">Start the daemon</div>
                   <div class="ist-d">
-                    Full docs and a compact cheat sheet are built into the tool.
+                    Auto-notifications at 4h, 6h, 9h… for pending tasks. Run
+                    once after install.
+                  </div>
+                  <div class="cl2">
+                    <span class="ps">$</span><span>todoc daemon start</span>
+                  </div>
+                </div>
+              </div>
+              <div class="is">
+                <div class="isn">4</div>
+                <div>
+                  <div class="ist-t">Explore</div>
+                  <div class="ist-d">
+                    Full reference or compact cheat sheet.
                   </div>
                   <div class="cl2">
                     <span class="ps">$</span><span>todoc help</span>
                   </div>
                   <div class="cl2" style="margin-top: 4px">
-                    <span class="ps">$</span><span>todoc --summary</span>
+                    <span class="ps">$</span><span>todoc -s</span>
                   </div>
                 </div>
               </div>
@@ -2111,9 +2294,17 @@
               <span style="color: var(--amber); font-size: 14px; flex-shrink: 0"
                 >ℹ</span
               ><span
-                >Tasks are stored in <strong>~/.todoc/tasks.json</strong> —
-                plain JSON on your local machine. No telemetry, no internet
-                required after install.</span
+                >Tasks stored in <strong>~/.todoc/tasks.json</strong>. No
+                telemetry, no internet required after install.<br /><br /><strong
+                  >macOS notifications:</strong
+                >
+                <code style="font-family: var(--mono); font-size: 11px"
+                  >pip install todoc[macos]</code
+                >
+                +
+                <code style="font-family: var(--mono); font-size: 11px"
+                  >brew install terminal-notifier</code
+                ></span
               >
             </div>
           </div>
@@ -2121,8 +2312,7 @@
             <div class="iln">
               <span class="p">$</span><span class="c">pip install todoc</span>
             </div>
-            <div class="io inf">Collecting todoc...</div>
-            <div class="io ok">Successfully installed todoc-0.1.0</div>
+            <div class="io inf">Successfully installed todoc-0.1.0</div>
             <div class="isp"></div>
             <div class="iln">
               <span class="p">$</span
@@ -2141,22 +2331,23 @@
             </div>
             <div class="isp"></div>
             <div class="iln">
-              <span class="p">$</span><span class="c">todoc done 1</span>
+              <span class="p">$</span><span class="c">todoc daemon start</span>
             </div>
-            <div class="io ok">✓ Task #1 completed 🎉</div>
-            <div class="isp"></div>
-            <div class="iln">
-              <span class="p">$</span><span class="c">todoc stats</span>
-            </div>
-            <div class="io dim">
-              1/2 done · 1 pending · 50% ██████████████░░░░░░░░░░░░░░
+            <div class="io ok">✓ Daemon loaded — runs every 30 min</div>
+            <div class="io ok">
+              ✓ Notifies at 4h · 6h · 9h · 12h · 18h · 24h
             </div>
             <div class="isp"></div>
             <div class="iln">
-              <span class="p">$</span
-              ><span class="c">todoc export -o backup.json</span>
+              <span class="p">$</span><span class="c">todoc tui</span>
             </div>
-            <div class="io ok">✓ 2 task(s) → backup.json</div>
+            <div class="io inf">Launching interactive dashboard...</div>
+            <div class="isp"></div>
+            <div class="iln">
+              <span class="p">$</span><span class="c">todoc -s</span>
+            </div>
+            <div class="io dim">◈ todoc — command summary</div>
+            <div class="io dim">add list done edit ...</div>
             <div class="isp"></div>
             <div class="iln">
               <span class="p">$</span
@@ -2173,8 +2364,8 @@
           <div class="fce-lbl">about</div>
           <div class="fce-t">todoc</div>
           <p class="fce-s">
-            The most powerful terminal task manager. Built with Typer and Rich.
-            Open source, MIT licensed.
+            The most powerful terminal task manager. TUI dashboard, Kanban
+            board, fuzzy search, auto-notifications. MIT licensed.
           </p>
         </div>
         <div class="fce">
@@ -2182,19 +2373,19 @@
           <div class="fls">
             <a href="https://github.com/anikchand461/todoc" target="_blank"
               >GitHub repository ↗</a
-            ><a href="https://pypi.org/project/todoc/0.1.0/" target="_blank"
+            ><a href="https://pypi.org/project/todoc/" target="_blank"
               >PyPI page ↗</a
+            ><a href="https://todocpy.vercel.app" target="_blank">Website ↗</a
             ><a href="#demo">Interactive demo</a
             ><a href="#commands">Command reference</a
             ><a href="#install">Installation guide</a>
           </div>
         </div>
         <div class="fce">
-          <div class="fce-lbl">quick commands</div>
+          <div class="fce-lbl">quick start</div>
           <div class="fcmd">
-            $ todoc add "task" -p high<br />$ todoc list --by priority<br />$
-            todoc done 1 2 5<br />$ todoc search "#bug"<br />$ todoc export -o
-            backup.json<br />$ todoc --summary
+            $ pip install todoc<br />$ todoc add "task" -p high<br />$ todoc
+            daemon start<br />$ todoc tui<br />$ todoc board<br />$ todoc -s
           </div>
         </div>
       </div>
@@ -2204,7 +2395,7 @@
           <span class="fbn">todoc</span>
         </div>
         <span class="fcp"
-          >MIT License · Python 3.10+ · Built with Typer &amp; Rich</span
+          >MIT License · Python 3.10+ · Typer · Rich · Textual</span
         >
       </div>
     </footer>

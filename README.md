@@ -4,19 +4,26 @@
 Fast, beautiful, and built entirely in your shell.
 
 ```
-╭─────────────────────────────────────────────────────────╮
-│                   ◈  T O D O C                          │
-│          the most powerful terminal task manager        │
-╰─────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────╮
+│                     ◈  T O D O C                             │
+│           the most powerful terminal task manager            │
+╰──────────────────────────────────────────────────────────────╯
 
-  #   Priority     Task                    Tags
- ─────────────────────────────────────────────────────────
-  1  ┃ HIGH ┃  ○  Fix login bug           #bug #backend
-  2  ┃ MED  ┃  ○  Write unit tests        #dev
-  3  ┃ LOW  ┃  ✓  Update README           #docs
+  #   Priority     St   Task                    Tags
+ ──────────────────────────────────────────────────────────────
+  1  ┃ CRIT ┃  ○  Ship v2.0 release         due:Mon #release
+  2  ┃ HIGH ┃  ○  Fix login bug              #bug #backend
+  3  ┃ MED  ┃  ✓  Write unit tests           #dev
+  4  ┃ LOW  ┃  ○  Update docs                #docs
 
-  2/3  done  ·  1 pending  ·  67%  ████████████░░░░░░░░
+  1/4  done  ·  3 pending  ·  25%  ████░░░░░░░░░░░░░░░░░░░░░░
 ```
+
+[![PyPI version](https://img.shields.io/pypi/v/todoc)](https://pypi.org/project/todoc/)
+[![Python](https://img.shields.io/pypi/pyversions/todoc)](https://pypi.org/project/todoc/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-anikchand461%2Ftodoc-black?logo=github)](https://github.com/anikchand461/todoc)
+[![Website](https://img.shields.io/badge/Website-todocpy.vercel.app-blue)](https://todocpy.vercel.app)
 
 ---
 
@@ -28,46 +35,62 @@ pip install todoc
 
 Requires Python 3.10+.
 
+### Optional extras
+
+```bash
+pip install todoc[macos]      # rich macOS notifications
+pip install todoc[windows]    # Windows desktop notifications
+pip install todoc[dev]        # pytest + dev tools
+```
+
+> ⚠️ **macOS notification setup:** After `pip install todoc[macos]`:
+>
+> ```bash
+> brew install terminal-notifier
+> ```
+>
+> Then go to **System Settings → Notifications → terminal-notifier** and enable notifications.
+
 ---
 
 ## Quick Start
 
 ```bash
-# Add your first task
 todoc add "Fix login bug" -p high --tags "#bug #backend"
-
-# See everything
 todoc list
-
-# Mark it done
 todoc done 1
-
-# Get help
-todoc help
-todoc --summary        # compact one-screen command list
+todoc tui          # interactive dashboard
+todoc help         # full reference
+todoc -s           # compact command summary
 ```
 
 ---
 
 ## All Commands
 
-| Command  | What it does               |
-| -------- | -------------------------- |
-| `add`    | Create a new task          |
-| `list`   | Show all tasks             |
-| `done`   | Mark task(s) complete      |
-| `undone` | Reopen a completed task    |
-| `delete` | Remove a task forever      |
-| `edit`   | Change any field           |
-| `show`   | Full detail for one task   |
-| `search` | Find tasks by keyword      |
-| `sort`   | List sorted by a field     |
-| `stats`  | Completion statistics      |
-| `clear`  | Remove all done tasks      |
-| `reset`  | Wipe ALL tasks permanently |
-| `export` | Save tasks to JSON or CSV  |
-| `import` | Load tasks from JSON file  |
-| `help`   | Full command reference     |
+| Command   | What it does                                   |
+| --------- | ---------------------------------------------- |
+| `add`     | Create a new task                              |
+| `list`    | Show all tasks (done + pending)                |
+| `done`    | Mark one or more tasks complete                |
+| `undone`  | Reopen a completed task                        |
+| `delete`  | Remove a task permanently                      |
+| `edit`    | Change any field of a task                     |
+| `show`    | Full detail for one task (includes subtasks)   |
+| `search`  | Full-text search — supports `--fuzzy` matching |
+| `sort`    | Display list sorted by a field                 |
+| `stats`   | Beautiful statistics dashboard                 |
+| `clear`   | Remove all completed tasks                     |
+| `reset`   | ⚠️ Wipe ALL tasks permanently                  |
+| `export`  | Save tasks to JSON or CSV                      |
+| `import`  | Load tasks from a JSON backup                  |
+| `subtask` | Add a subtask under an existing task           |
+| `status`  | Move a task between Kanban columns             |
+| `board`   | Kanban board — To Do / In Progress / Done      |
+| `tui`     | Interactive TUI dashboard (keyboard-driven)    |
+| `notify`  | Send desktop notification for urgent tasks     |
+| `daemon`  | Background auto-notification scheduler         |
+| `help`    | Full command reference                         |
 
 ---
 
@@ -76,15 +99,9 @@ todoc --summary        # compact one-screen command list
 ### Adding tasks
 
 ```bash
-# Minimal
 todoc add "Buy groceries"
-
-# With priority
 todoc add "Ship v2" -p critical
-
-# With tags — the Tags column is free-form, put anything there
 todoc add "Fix auth" -p high --tags "#bug due:fri @alice"
-todoc add "Research" --tags "see notion.so/abc #reading"
 ```
 
 **Priority levels:**
@@ -99,124 +116,173 @@ todoc add "Research" --tags "see notion.so/abc #reading"
 ### Listing & filtering
 
 ```bash
-todoc list                        # all tasks (done + pending)
-todoc list --pending              # only unfinished tasks
-todoc list --completed            # only finished tasks
+todoc list                        # all tasks
+todoc list --pending              # only unfinished
+todoc list --completed            # only finished
 todoc list -p high                # filter by priority
 todoc list --by priority          # sort: critical → low
-todoc list --by priority --desc   # sort: low → critical
-```
-
-### Viewing a single task
-
-```bash
-todoc show 3        # full detail panel — all fields visible
+todoc list --by priority --desc   # reverse sort
 ```
 
 ### Completing tasks
 
 ```bash
-todoc done 3          # mark task #3 done
-todoc done 1 4 7      # bulk-complete three tasks at once
-todoc undone 3        # reopen task #3
+todoc done 3            # mark #3 done
+todoc done 1 4 7        # bulk-complete three at once
+todoc undone 3          # reopen #3
 ```
 
 ### Editing tasks
 
-Only the flags you pass are updated — everything else stays as-is.
+Only passed flags are updated — everything else stays as-is.
 
 ```bash
-todoc edit 3 -p critical                         # escalate priority
-todoc edit 3 --tags "#done waiting-for-review"   # update tags
-todoc edit 3 -d "New description" -p high        # two fields at once
-todoc edit 3 --tags ""                           # clear the tags field
+todoc edit 3 -p critical
+todoc edit 3 --tags "#urgent waiting-for-review"
+todoc edit 3 -d "New description" -p high
+todoc edit 3 --status doing
+todoc edit 3 --tags ""            # clear a field
 ```
 
-### Searching
+### Subtasks
 
 ```bash
-todoc search "auth"       # matches description and tags
-todoc search "#bug"       # find all tasks tagged #bug
+todoc subtask 1 "Write unit tests" -p medium
+todoc subtask 1 "Update changelog" -p low
+todoc show 1          # shows parent + all subtasks
 ```
 
-### Sorting
+Deleting a parent also removes all its subtasks.
+
+### Fuzzy Search
 
 ```bash
-todoc sort --by priority        # critical tasks first
-todoc sort --by created         # oldest first
-todoc sort --by priority --desc # lowest priority first
+todoc search "auth"               # exact match
+todoc search "lgin" --fuzzy       # finds "Fix login bug"
+todoc search "shp v2" --fuzzy     # finds "Ship v2.0 release"
 ```
+
+### Kanban Board
+
+```bash
+todoc board                  # view all columns
+todoc status 3 doing         # move #3 to In Progress
+todoc status 3 done          # move #3 to Done
+todoc status 3 todo          # move back to To Do
+```
+
+### Interactive TUI
+
+```bash
+todoc tui    # requires: pip install textual
+```
+
+| Key     | Action                        |
+| ------- | ----------------------------- |
+| `a`     | Add a new task                |
+| `e`     | Edit selected task            |
+| `Space` | Toggle done / pending         |
+| `n`     | Cycle status: todo→doing→done |
+| `d`     | Delete selected task          |
+| `/`     | Fuzzy search                  |
+| `r`     | Refresh                       |
+| `q`     | Quit                          |
 
 ### Statistics
 
 ```bash
-todoc stats     # total / done / pending + breakdown by priority
+todoc stats    # counts, progress bar, priority & status breakdowns
 ```
 
 ### Removing tasks
 
 ```bash
-todoc delete 5             # delete task #5 (asks for confirmation)
-todoc delete 5 --force     # delete immediately, no prompt
-
+todoc delete 5 --force     # delete immediately
 todoc clear                # remove all completed tasks
-todoc reset                # ⚠ wipe EVERYTHING — done and pending
-todoc reset --force        # wipe immediately, no prompt
+todoc reset --force        # ⚠ wipe everything
 ```
 
-> **Tip:** Run `todoc export -o backup.json` before `reset` to keep a copy.
+> **Tip:** Run `todoc export -o backup.json` before `reset`.
 
 ### Export & Import
 
 ```bash
-# Export
-todoc export                          # print JSON to stdout
-todoc export > backup.json            # redirect to file
-todoc export -o backup.json           # same, explicit flag
-todoc export --format csv -o tasks.csv  # export as CSV
-
-# Import
-todoc import backup.json              # restore from backup
+todoc export -o backup.json
+todoc export --format csv -o tasks.csv
+todoc import backup.json
 ```
 
-The JSON export preserves every field and is ideal for backups.  
-The CSV export opens directly in Excel / Google Sheets.
+---
+
+## Desktop Notifications
+
+Notifications fire automatically at **4h, 6h, 9h, 12h, 18h, 24h** for every pending task — no terminal needed.
+
+```bash
+todoc daemon start     # install & start (run once after install)
+todoc daemon status    # check if running
+todoc daemon stop      # uninstall
+todoc notify           # fire manually right now
+```
+
+| Platform | Mechanism      | Requires                         |
+| -------- | -------------- | -------------------------------- |
+| macOS    | launchd        | `brew install terminal-notifier` |
+| Linux    | systemd / cron | `notify-send` (usually built-in) |
+| Windows  | Task Scheduler | Run as Administrator             |
+
+Logs: `~/.todoc/daemon.log`
 
 ---
 
 ## Help
 
 ```bash
-todoc --help          # full command reference (same as todoc help)
-todoc -h              # shorthand
-todoc --summary       # compact one-screen command + example list
-todoc -s              # shorthand
-
-todoc help            # full reference
-todoc help --summary  # compact list
-
-todoc <command> --help  # raw flag list for any single command
+todoc help              # full per-command reference with examples
+todoc -s                # compact one-screen command summary
+todoc <command> --help  # flag list for any single command
 ```
 
 ---
 
 ## Data Storage
 
-Tasks are stored locally as a JSON file at:
+```
+~/.todoc/
+├── tasks.json
+├── daemon.log
+└── daemon-error.log
+```
+
+No accounts, no sync, no cloud.
+
+---
+
+## Project Structure
 
 ```
-~/.todoc/tasks.json
+todoc/
+├── pyproject.toml
+├── README.md
+└── todoc/
+    ├── __init__.py
+    ├── __main__.py
+    ├── exceptions.py
+    ├── cli/
+    │   ├── main.py        # CLI entry point
+    │   ├── formatter.py   # Rich display layer
+    │   ├── tui.py         # Textual TUI dashboard
+    │   ├── board.py       # Kanban board renderer
+    │   └── daemon.py      # background notification daemon
+    ├── core/
+    │   ├── models.py      # Task dataclass
+    │   └── service.py     # business logic + fuzzy search
+    └── storage/
+        └── repository.py  # JSON read/write
 ```
-
-No accounts, no sync, no cloud — your data stays on your machine.
 
 ---
 
 ## License
 
-MIT
-
----
-
-_Built with [Typer](https://typer.tiangolo.com/) and [Rich](https://github.com/Textualize/rich)._
-
+MIT — Built with [Typer](https://typer.tiangolo.com/), [Rich](https://github.com/Textualize/rich), and [Textual](https://textual.textualize.io/).
