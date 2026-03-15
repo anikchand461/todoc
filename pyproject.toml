@@ -7,9 +7,9 @@ build-backend = "setuptools.build_meta"
 # ─────────────────────────────────────────────────────────────
 [project]
 name            = "todoc"
-version         = "0.1.0"
+version         = "0.1.1"
 description     = "The most powerful terminal task manager"
-authors         = [{ name = "Your Name", email = "you@example.com" }]
+authors         = [{ name = "Anik Chand", email = "anikchand461@gmail.com" }]
 license         = { text = "MIT" }
 requires-python = ">=3.10"
 
