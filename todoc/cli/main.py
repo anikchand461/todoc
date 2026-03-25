@@ -2,7 +2,13 @@
 import typer
 from rich.console import Console
 from rich.text import Text
+from rich.panel import Panel
+from rich.columns import Columns
+from rich.live import Live
+from rich.align import Align
+from rich import box
 from typing import List, Optional
+import time
 
 from todoc.core.service import TodoService
 from todoc.exceptions import TaskNotFoundError, TodocError
@@ -15,19 +21,139 @@ from todoc.cli.formatter import (
 
 console = Console()
 
+
 # ─────────────────────────────────────────────────────────────
-# Override --help at the app level to show our rich help page
+# Animated header shown on --help / todoc help
 # ─────────────────────────────────────────────────────────────
+
+def _render_help_header() -> None:
+    """Animated branded header: logo reveal → typewriter → panel fade → shimmer rule."""
+    from todoc import __version__
+
+    # ── 1. Big ASCII logo — left-to-right block reveal ────────
+    LOGO = [
+        "  ████████╗ ██████╗ ██████╗  ██████╗  ██████╗ ",
+        "     ██╔══╝██╔═══██╗██╔══██╗██╔═══██╗██╔════╝ ",
+        "     ██║   ██║   ██║██║  ██║██║   ██║██║      ",
+        "     ██║   ██║   ██║██║  ██║██║   ██║██║      ",
+        "     ██║   ╚██████╔╝██████╔╝╚██████╔╝╚██████╗ ",
+        "     ╚═╝    ╚═════╝ ╚═════╝  ╚═════╝  ╚═════╝ ",
+    ]
+    COLORS = ["#00e5ff", "#00cfeb", "#00b9d6", "#00a3c2", "#008dae", "#00779a"]
+    DIM    = "#1c2333"
+    width  = max(len(l) for l in LOGO)
+
+    console.print()
+    with Live(console=console, refresh_per_second=40, transient=False) as live:
+        for step in range(width + 1):
+            frame = Text()
+            for row, line in enumerate(LOGO):
+                shown = line[:step].ljust(step)
+                hidden = line[step:]
+                frame.append(shown,  style=f"bold {COLORS[row]}")
+                frame.append(hidden, style=f"{DIM} on default")
+                frame.append("\n")
+            live.update(frame)
+            time.sleep(0.010)
+
+    # ── 2. Version badge ── appears right after logo ───────────
+    console.print()
+    badge = Text.assemble(
+        Text("  todoc  ", style="bold black on cyan"),
+        Text(f"  v{__version__}  ", style="bold cyan"),
+    )
+    # Slide-in badge character by character
+    raw = f"  todoc    v{__version__}  "
+    with Live(console=console, refresh_per_second=40, transient=False) as live:
+        for i in range(1, len(raw) + 1):
+            live.update(Text(raw[:i], style="bold cyan"))
+            time.sleep(0.022)
+    # Overwrite with properly styled version
+    console.file.write("\r")
+    console.print(badge)
+    console.print()
+
+    # ── 3. Tagline — typewriter char by char ──────────────────
+    lines = [
+        ("  A beautiful, fast terminal task manager", "bold white"),
+        ("  Stay organised without ever leaving your shell.", "dim"),
+    ]
+    for text, style in lines:
+        with Live(console=console, refresh_per_second=40, transient=False) as live:
+            built = Text()
+            for ch in text:
+                built.append(ch, style=style)
+                live.update(built)
+                time.sleep(0.016)
+        console.print()
+    console.print()
+
+    # ── 4. Link panels — fade in one by one ───────────────────
+    def _panel(label, display, url, lit=True):
+        t = Text.assemble(
+            Text(label + "\n", style="dim"),
+            Text(display, style="bold cyan" if lit else "grey42"),
+        )
+        if lit:
+            t.stylize(f"link {url}", len(label) + 1, len(label) + 1 + len(display))
+        return Panel(
+            t,
+            border_style="cyan" if lit else "grey23",
+            padding=(0, 2),
+            box=box.ROUNDED,
+        )
+
+    LINKS = [
+        ("website", "todocpy.vercel.app",           "https://todocpy.vercel.app"),
+        ("pypi",    "pypi.org/project/todoc",        "https://pypi.org/project/todoc/"),
+        ("github",  "github.com/anikchand461/todoc", "https://github.com/anikchand461/todoc"),
+    ]
+
+    with Live(console=console, refresh_per_second=20, transient=False) as live:
+        for reveal in range(len(LINKS) + 1):
+            panels = [
+                _panel(lbl, disp, url, lit=(i < reveal))
+                for i, (lbl, disp, url) in enumerate(LINKS)
+            ]
+            live.update(Columns(panels, padding=(0, 1)))
+            time.sleep(0.22)
+
+    console.print()
+
+    # ── 5. Author — shimmer sweep ──────────────────────────────
+    SHIMMER_STYLES = [
+        "dim", "grey70", "white", "bold white",
+        "bold cyan", "bold white", "white", "grey70", "dim",
+    ]
+    with Live(console=console, refresh_per_second=15, transient=False) as live:
+        for style in SHIMMER_STYLES:
+            live.update(Text.assemble(
+                Text("  author  ", style="dim"),
+                Text("Anik Chand", style=style),
+            ))
+            time.sleep(0.08)
+    console.print()
+
+    # ── 6. Animated cyan rule sweeps across ───────────────────
+    term_width = console.width or 80
+    with Live(console=console, refresh_per_second=60, transient=False) as live:
+        for i in range(term_width + 1):
+            live.update(Text("─" * i, style="dim cyan"))
+            time.sleep(0.003)
+    console.print()
 
 def _show_help(value: bool):
     if value:
-        render_help()
+        _render_help_header()
+        render_summary()          # compact command list (was render_help)
         raise typer.Exit()
+
 
 def _show_summary(value: bool):
     if value:
         render_summary()
         raise typer.Exit()
+
 
 app = typer.Typer(
     name             = "todoc",
@@ -35,6 +161,7 @@ app = typer.Typer(
     rich_markup_mode = "rich",
     add_help_option  = False,
 )
+
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Root callback
@@ -44,7 +171,7 @@ app = typer.Typer(
 def main(
     ctx:     typer.Context,
     version: bool = typer.Option(False, "--version", "-v", help="Show version and exit.", is_eager=True),
-    help_:   bool = typer.Option(False, "--help",    "-h", help="Show the full command reference.", is_eager=True,
+    help_:   bool = typer.Option(False, "--help",    "-h", help="Show the command reference.", is_eager=True,
                                  callback=_show_help, expose_value=False),
     summary: bool = typer.Option(False, "--summary", "-s", help="Show compact command list.", is_eager=True,
                                  callback=_show_summary, expose_value=False),
@@ -61,7 +188,6 @@ def main(
         svc   = TodoService()
         tasks = svc.get_tasks()
         render_task_list(tasks)
-        # Auto-notify on every bare `todoc` invocation
         try:
             notified = svc.notify_check()
             if notified:
@@ -79,16 +205,21 @@ def main(
 @app.command()
 def help(
     summary: bool = typer.Option(False, "--summary", "-s", help="Compact command list only"),
+    full:    bool = typer.Option(False, "--full",    "-f", help="Show full verbose reference"),
 ):
-    """Show the full command reference."""
-    if summary:
-        render_summary()
+    """Show the command reference with links and usage examples."""
+    if full:
+        _render_help_header()
+        render_help()          # detailed reference (accessible via todoc help --full)
+    elif summary:
+        render_summary()       # bare compact list, no header
     else:
-        render_help()
+        _render_help_header()
+        render_summary()       # default: header + compact list
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# tui  ← NEW
+# tui
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.command()
@@ -119,7 +250,7 @@ def tui():
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# board  ← NEW
+# board
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.command()
@@ -142,7 +273,7 @@ def board():
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# status  ← NEW  (moves a task between Kanban columns)
+# status
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.command()
@@ -176,7 +307,7 @@ def status(
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# subtask  ← NEW
+# subtask
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.command()
@@ -212,7 +343,7 @@ def subtask(
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# notify  ← NEW
+# notify
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.command()
@@ -226,7 +357,6 @@ def notify():
 
     [bold]Examples[/bold]
       todoc notify
-      todoc notify                      ← run manually
       # Add to crontab for auto alerts:
       # */30 * * * * todoc notify
     """
@@ -273,7 +403,6 @@ def add(
     try:
         svc  = TodoService()
         task = svc.create_task(description, priority=priority, tags=tags)
-        # auto-notify if critical
         if priority.lower() == "critical":
             svc.notify_check()
         body = (
@@ -311,11 +440,6 @@ def list_tasks(
         if priority:
             tasks = [t for t in tasks if t.priority.lower() == priority.lower()]
         render_task_list(tasks, sort_by=by)
-
-        # ── Auto-notify: fire silently in background after listing ──
-        # Checks if any tasks have been pending past their threshold
-        # (6 hrs for critical/high, 24 hrs for medium, 48 hrs for low)
-        # and sends a desktop notification if so. Respects a 6-hr cooldown.
         try:
             notified = svc.notify_check()
             if notified:
@@ -323,8 +447,7 @@ def list_tasks(
                     f"{len(notified)} overdue task(s) — desktop notification sent."
                 )
         except Exception:
-            pass   # never let notify crash the list command
-
+            pass
     except TodocError as e:
         print_error(str(e)); raise typer.Exit(code=1)
 
@@ -340,7 +463,6 @@ def show(task_id: int = typer.Argument(..., help="Task ID")):
         svc  = TodoService()
         task = svc.get_task(task_id)
         render_task_detail(task)
-        # Show subtasks inline if any
         subtasks = svc.get_subtasks(task_id)
         if subtasks:
             console.print(f"  [dim]subtasks ({len(subtasks)}):[/dim]")
@@ -466,7 +588,7 @@ def delete(
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# search  (now supports --fuzzy)
+# search
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.command()
@@ -585,7 +707,7 @@ def reset(
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# daemon  ← background notification scheduler
+# daemon
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.command()
@@ -601,12 +723,12 @@ def daemon(
     for every pending task — no terminal needed.
 
     [bold]Platform support:[/bold]
-      macOS    →  launchd  (runs even when terminal is closed)
+      macOS    →  launchd
       Linux    →  systemd user timer  (cron fallback)
       Windows  →  Task Scheduler
 
     [bold]Examples[/bold]
-      todoc daemon start     ← install & start (run once after install)
+      todoc daemon start     ← install & start
       todoc daemon stop      ← uninstall the daemon
       todoc daemon status    ← check if it\'s running
     """
@@ -616,7 +738,7 @@ def daemon(
             "start":  start,
             "stop":   stop,
             "status": status,
-            "run":    run_check,   # called internally by the OS scheduler
+            "run":    run_check,
         }
         fn = acts.get(action.lower())
         if not fn:
