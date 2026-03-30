@@ -461,9 +461,10 @@ _IDX = [
     ("export",        "Save tasks to file",             "todoc export -o backup.json"),
     ("import",        "Load tasks from file",           "todoc import backup.json"),
     # ── Notion sync ──────────────────────────────────────────
-    ("push",          "Sync local tasks → Notion",      "todoc push"),
-    ("pull",          "Sync Notion tasks → local",      "todoc pull"),
-    ("notion-logout", "Remove saved Notion credentials","todoc notion-logout"),
+    ("notion-link",   "Connect todoc to Notion (one-time)", "todoc notion-link"),
+    ("push",          "Delta-sync local tasks → Notion",    "todoc push"),
+    ("pull",          "Delta-sync Notion → local",          "todoc pull"),
+    ("notion-logout", "Remove saved Notion credentials",    "todoc notion-logout"),
     # ── Help ─────────────────────────────────────────────────
     ("help",          "Full command reference",         "todoc help --full"),
 ]
@@ -799,35 +800,41 @@ def render_help() -> None:
     # ══════════════════════════════════════════════════════════
     _h_rule("Notion Sync")
 
-    _cmd("↑", "push", "[--reset]",
-         'Upload all local tasks to Notion (local → Notion, full sync). Credentials are saved on first run.')
+    _cmd("🔗", "notion-link", "[--reset]",
+         'Connect todoc to your Notion workspace. Prompts for token + page ID, verifies them, and saves credentials. Run this once before using push or pull.')
     _sub("Flags")
-    _flag("--reset", "flag", "Forget saved credentials and re-enter them")
-    _sub("First-time setup")
-    _note("1. Create an integration at  https://www.notion.so/my-integrations")
-    _note("2. Copy the Internal Integration Token")
-    _note("3. Share your target Notion page with the integration")
-    _note("4. Copy the 32-char Page ID from the page URL")
-    _note("Credentials are saved to  ~/.todoc/notion_creds.json  for all future syncs.")
+    _flag("--reset", "flag", "Replace existing saved credentials")
+    _sub("Setup steps")
+    _note("1. Go to  https://www.notion.so/my-integrations  → create integration → copy token")
+    _note("2. Open your Notion page → Share → invite your integration")
+    _note("3. Copy the 32-char Page ID from the page URL")
+    _note("Credentials saved to  ~/.todoc/notion_creds.json  (chmod 600).")
     _sub("Examples")
-    _ex("todoc push",          'Sync local tasks to Notion')
-    _ex("todoc push --reset",  'Update saved credentials, then sync')
+    _ex("todoc notion-link",          'First-time setup')
+    _ex("todoc notion-link --reset",  'Replace saved credentials')
     _spacer()
 
-    _cmd("↓", "pull", "[--reset]",
-         'Download tasks from Notion and replace local tasks (Notion → local, full sync). Auto-backs up local tasks first.')
-    _sub("Flags")
-    _flag("--reset", "flag", "Forget saved credentials and re-enter them")
-    _sub("Notes")
-    _note("Local tasks are backed up to  ~/.todoc/tasks_before_pull.json  before overwriting.")
-    _note("Credentials are shared with  todoc push — set up once, works for both.")
+    _cmd("↑", "push", "",
+         'Delta-sync local tasks → Notion. Only creates, updates, or archives rows whose content changed. Unchanged tasks are skipped. Run todoc notion-link first.')
+    _sub("How it works")
+    _note("Fetches all Notion rows, diffs by TaskID, patches only what changed.")
+    _note("Output: ✚ created  ✎ updated  ✕ archived  — unchanged·skipped")
+    _note("Task names are prefixed [001] in Notion for natural sort order.")
     _sub("Examples")
-    _ex("todoc pull",          'Sync Notion tasks to local')
-    _ex("todoc pull --reset",  'Update saved credentials, then pull')
+    _ex("todoc push", 'Delta-sync local → Notion')
+    _spacer()
+
+    _cmd("↓", "pull", "",
+         'Delta-sync Notion → local. Merges added/updated/removed task IDs only. Auto-backs up local tasks to ~/.todoc/tasks_before_pull.json first.')
+    _sub("How it works")
+    _note("Fetches Notion rows, diffs by TaskID against local, merges changes only.")
+    _note("Unchanged local tasks are untouched.")
+    _sub("Examples")
+    _ex("todoc pull", 'Delta-sync Notion → local')
     _spacer()
 
     _cmd("🔓", "notion-logout", "",
-         'Delete saved Notion credentials from this machine. The next push or pull will prompt again.')
+         'Delete saved Notion credentials from this machine. Run todoc notion-link to reconnect.')
     _sub("Examples")
     _ex("todoc notion-logout", 'Remove stored Notion credentials')
 

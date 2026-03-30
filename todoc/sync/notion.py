@@ -113,7 +113,7 @@ def _find_or_create_database(api_key: str, page_id: str) -> str:
                 if parent.get("page_id", "").replace("-", "") == page_id.replace("-", ""):
                     return obj["id"]
 
-    # Create fresh database
+    # Create fresh database with default view sorted by TaskID ascending
     schema = {
         "Name":      {"title": {}},
         "Done":      {"checkbox": {}},
@@ -137,18 +137,44 @@ def _find_or_create_database(api_key: str, page_id: str) -> str:
         "parent":     {"type": "page_id", "page_id": page_id},
         "title":      [{"type": "text", "text": {"content": _DB_TITLE}}],
         "properties": schema,
+        "is_inline":  False,
     }
     result = _req("POST", f"{NOTION_API}/databases", api_key, body)
-    return result["id"]
+    db_id = result["id"]
+
+    # Patch the database to set default view sort by TaskID ascending.
+    # This controls the order users see in the Notion UI.
+    try:
+        _req("PATCH", f"{NOTION_API}/databases/{db_id}", api_key, {
+            "description": [{"type": "text", "text": {
+                "content": "Managed by todoc · sorted by TaskID"
+            }}],
+        })
+    except Exception:
+        pass  # non-fatal — UI sort is best-effort
+
+    return db_id
 
 
 # ──────────────────────────────────────────────────────────
 # Row ↔ Task conversion
 # ──────────────────────────────────────────────────────────
 
+def _name_with_prefix(task_id: int, description: str) -> str:
+    """Return '[001] description' — zero-padded ID prefix so Notion's
+    default title sort shows tasks in the same order as the CLI."""
+    return f"[{task_id:03d}] {description}"
+
+
+def _strip_prefix(name: str) -> str:
+    """Remove the '[NNN] ' prefix added by _name_with_prefix, if present."""
+    import re
+    return re.sub(r"^\[\d+\]\s*", "", name)
+
+
 def _task_to_properties(task) -> dict:
     return {
-        "Name":      {"title":     [{"text": {"content": task.description}}]},
+        "Name":      {"title":     [{"text": {"content": _name_with_prefix(task.id, task.description)}}]},
         "Done":      {"checkbox":  task.done},
         "Priority":  {"select":    {"name": task.priority or "medium"}},
         "Tags":      {"rich_text": [{"text": {"content": task.tags or ""}}]},
@@ -165,7 +191,7 @@ def _properties_to_dict(props: dict) -> dict:
         return "".join(x.get("plain_text", "") for x in parts)
 
     return {
-        "description": _text(props.get("Name",  {})),
+        "description": _strip_prefix(_text(props.get("Name",  {}))),
         "done":        props.get("Done",     {}).get("checkbox", False),
         "priority":    (props.get("Priority", {}).get("select") or {}).get("name", "medium"),
         "tags":        _text(props.get("Tags",   {})),
@@ -174,6 +200,21 @@ def _properties_to_dict(props: dict) -> dict:
         "parent_id":   int(props.get("ParentID", {}).get("number") or 0),
         "created_at":  _text(props.get("CreatedAt", {})),
     }
+
+
+# ──────────────────────────────────────────────────────────
+# Shared query helpers
+# ──────────────────────────────────────────────────────────
+
+# Always query Notion sorted by TaskID ascending so the UI reflects CLI order.
+_SORTS = [{"property": "TaskID", "direction": "ascending"}]
+
+
+def _query_body(cursor: Optional[str] = None) -> dict:
+    body: dict = {"page_size": 100, "sorts": _SORTS}
+    if cursor:
+        body["start_cursor"] = cursor
+    return body
 
 
 # ──────────────────────────────────────────────────────────
@@ -191,35 +232,74 @@ def verify_api_key(api_key: str) -> bool:
 
 def push_tasks(tasks: list, api_key: str, page_id: str) -> dict:
     """
-    Full-replace sync: archive all existing Notion rows, then upload all local tasks.
-    Returns {"pushed": N, "db_id": "..."}
+    Delta push: only create/update/archive rows whose TaskID changed.
+    - Tasks present locally but missing in Notion → created.
+    - Tasks present in both and changed → updated in-place (PATCH).
+    - Tasks present in Notion but deleted locally → archived.
+    Returns {"created": N, "updated": N, "archived": N, "unchanged": N, "db_id": "..."}
     """
     db_id = _find_or_create_database(api_key, page_id)
 
-    # Collect existing page IDs
-    existing: list[str] = []
+    # Fetch all existing Notion rows → {task_id: (page_id, properties_dict)}
+    notion_rows: dict[int, tuple[str, dict]] = {}
     has_more, cursor = True, None
     while has_more:
-        body: dict = {"page_size": 100}
-        if cursor:
-            body["start_cursor"] = cursor
-        result   = _req("POST", f"{NOTION_API}/databases/{db_id}/query", api_key, body)
-        existing += [p["id"] for p in result.get("results", [])]
-        has_more  = result.get("has_more", False)
-        cursor    = result.get("next_cursor")
+        result = _req("POST", f"{NOTION_API}/databases/{db_id}/query", api_key, _query_body(cursor))
+        for p in result.get("results", []):
+            if p.get("archived"):
+                continue
+            props = p.get("properties", {})
+            tid = int(props.get("TaskID", {}).get("number") or 0)
+            if tid > 0:
+                notion_rows[tid] = (p["id"], _properties_to_dict(props))
+        has_more = result.get("has_more", False)
+        cursor   = result.get("next_cursor")
 
-    # Archive them
-    for pid in existing:
-        _req("PATCH", f"{NOTION_API}/pages/{pid}", api_key, {"archived": True})
+    local_ids = {task.id for task in tasks}
+    created = updated = archived = unchanged = 0
 
-    # Upload fresh
+    # Create or update
     for task in tasks:
-        _req("POST", f"{NOTION_API}/pages", api_key, {
-            "parent":     {"database_id": db_id},
-            "properties": _task_to_properties(task),
-        })
+        new_props = _task_to_properties(task)
+        if task.id not in notion_rows:
+            # New task — create
+            _req("POST", f"{NOTION_API}/pages", api_key, {
+                "parent":     {"database_id": db_id},
+                "properties": new_props,
+            })
+            created += 1
+        else:
+            existing_page_id, existing_data = notion_rows[task.id]
+            # Compare fields to decide whether an update is needed
+            changed = (
+                existing_data.get("description") != task.description
+                or existing_data.get("done")      != task.done
+                or existing_data.get("priority")  != (task.priority or "medium")
+                or existing_data.get("tags")      != (task.tags or "")
+                or existing_data.get("status")    != (task.status or "todo")
+                or existing_data.get("parent_id") != (task.parent_id or 0)
+            )
+            if changed:
+                _req("PATCH", f"{NOTION_API}/pages/{existing_page_id}", api_key,
+                     {"properties": new_props})
+                updated += 1
+            else:
+                unchanged += 1
 
-    return {"pushed": len(tasks), "db_id": db_id}
+    # Archive rows that no longer exist locally
+    for tid, (existing_page_id, _) in notion_rows.items():
+        if tid not in local_ids:
+            _req("PATCH", f"{NOTION_API}/pages/{existing_page_id}", api_key,
+                 {"archived": True})
+            archived += 1
+
+    return {
+        "created":   created,
+        "updated":   updated,
+        "archived":  archived,
+        "unchanged": unchanged,
+        "db_id":     db_id,
+    }
 
 
 def pull_tasks(api_key: str, page_id: str) -> list[dict]:
@@ -232,10 +312,7 @@ def pull_tasks(api_key: str, page_id: str) -> list[dict]:
     rows: list[dict] = []
     has_more, cursor = True, None
     while has_more:
-        body: dict = {"page_size": 100}
-        if cursor:
-            body["start_cursor"] = cursor
-        result = _req("POST", f"{NOTION_API}/databases/{db_id}/query", api_key, body)
+        result = _req("POST", f"{NOTION_API}/databases/{db_id}/query", api_key, _query_body(cursor))
         for page in result.get("results", []):
             if not page.get("archived"):
                 row = _properties_to_dict(page.get("properties", {}))
@@ -246,3 +323,71 @@ def pull_tasks(api_key: str, page_id: str) -> list[dict]:
 
     rows.sort(key=lambda r: r["id"])
     return rows
+
+
+def pull_tasks_delta(local_tasks: list, api_key: str, page_id: str) -> dict:
+    """
+    Delta pull: compare Notion rows against local tasks and return only what changed.
+    - added:     rows in Notion not present locally (by TaskID) → need to be inserted
+    - updated:   rows in Notion whose fields differ from local → need to overwrite local
+    - removed:   TaskIDs present locally but missing from Notion (deleted remotely)
+    - unchanged: count of rows that match exactly
+
+    Returns {
+        "added":     [dict, ...],
+        "updated":   [dict, ...],
+        "removed":   [int, ...],   # list of TaskIDs
+        "unchanged": int,
+        "db_id":     str,
+    }
+    """
+    db_id = _find_or_create_database(api_key, page_id)
+
+    # Build local lookup {task_id → task}
+    local_by_id = {t.id: t for t in local_tasks}
+
+    notion_rows: list[dict] = []
+    has_more, cursor = True, None
+    while has_more:
+        result = _req("POST", f"{NOTION_API}/databases/{db_id}/query", api_key, _query_body(cursor))
+        for page in result.get("results", []):
+            if not page.get("archived"):
+                row = _properties_to_dict(page.get("properties", {}))
+                if row["id"] > 0 and row["description"]:
+                    notion_rows.append(row)
+        has_more = result.get("has_more", False)
+        cursor   = result.get("next_cursor")
+
+    notion_ids = {r["id"] for r in notion_rows}
+    added: list[dict] = []
+    updated: list[dict] = []
+    unchanged = 0
+
+    for row in notion_rows:
+        tid = row["id"]
+        if tid not in local_by_id:
+            added.append(row)
+        else:
+            loc = local_by_id[tid]
+            changed = (
+                loc.description               != row["description"]
+                or loc.done                   != row["done"]
+                or (loc.priority or "medium") != row["priority"]
+                or (loc.tags or "")           != row["tags"]
+                or (loc.status or "todo")     != row["status"]
+                or (loc.parent_id or 0)       != row["parent_id"]
+            )
+            if changed:
+                updated.append(row)
+            else:
+                unchanged += 1
+
+    removed = [tid for tid in local_by_id if tid not in notion_ids]
+
+    return {
+        "added":     added,
+        "updated":   updated,
+        "removed":   removed,
+        "unchanged": unchanged,
+        "db_id":     db_id,
+    }
