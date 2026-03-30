@@ -9,6 +9,7 @@ from rich.align import Align
 from rich import box
 from typing import List, Optional
 import time
+from pathlib import Path
 
 from todoc.core.service import TodoService
 from todoc.exceptions import TaskNotFoundError, TodocError
@@ -796,6 +797,216 @@ def import_tasks(
         raise typer.Exit(code=1)
     except Exception as e:
         print_error(f"Import failed: {e}"); raise typer.Exit(code=1)
+
+
+@app.command()
+def push(
+    reset_creds: bool = typer.Option(
+        False, "--reset",
+        help="Forget saved credentials and re-enter them.",
+    ),
+):
+    """Push all local tasks to Notion (full sync, local → Notion).
+
+    Credentials are asked once and saved permanently to
+    [bold]~/.todoc/notion_creds.json[/bold]. Subsequent runs need no prompts.
+
+    [bold]How to get credentials:[/bold]
+      1. Create an integration at [cyan]https://www.notion.so/my-integrations[/cyan]
+      2. Copy the Internal Integration Token
+      3. Share your target page with the integration
+      4. Copy the Page ID from the page URL (32-char hex)
+
+    [bold]Examples[/bold]
+      todoc push           ← sync local → Notion
+      todoc push --reset   ← update saved credentials, then sync
+    """
+    from todoc.sync.notion import (
+        load_credentials, save_credentials, verify_api_key,
+        push_tasks, NotionError,
+    )
+
+    creds = None if reset_creds else load_credentials()
+
+    if creds is None:
+        console.print()
+        panel_info(
+            "Notion credentials required",
+            "todoc will save these to [bold]~/.todoc/notion_creds.json[/bold] "
+            "for all future push / pull commands.\n\n"
+            "[dim]https://www.notion.so/my-integrations[/dim]",
+        )
+        console.print()
+        api_key = typer.prompt("  Notion Integration Token").strip()
+        if not api_key:
+            print_error("Token cannot be empty."); raise typer.Exit(code=1)
+
+        console.print("  [dim]Verifying token…[/dim]")
+        if not verify_api_key(api_key):
+            panel_error(
+                "Invalid token",
+                "Could not authenticate with Notion.\n"
+                "[dim]Check your token at https://www.notion.so/my-integrations[/dim]",
+            )
+            raise typer.Exit(code=1)
+        print_success("Token verified ✓")
+
+        console.print()
+        page_id = typer.prompt(
+            "  Notion Page ID  [dim](32-char hex from the page URL)[/dim]"
+        ).strip().replace("-", "")
+        if len(page_id) != 32:
+            panel_error(
+                "Invalid Page ID",
+                "Page ID must be 32 hex characters.\n"
+                "[dim]Copy it from: notion.so/<workspace>/<PageID>[/dim]",
+            )
+            raise typer.Exit(code=1)
+
+        save_credentials(api_key, page_id)
+        print_success("Credentials saved to ~/.todoc/notion_creds.json")
+        creds = {"api_key": api_key, "page_id": page_id}
+
+    console.print()
+    console.print("  [dim]Connecting to Notion…[/dim]")
+    try:
+        svc    = TodoService()
+        tasks  = svc.get_tasks()
+        result = push_tasks(tasks, creds["api_key"], creds["page_id"])
+        panel_success(
+            "Push complete  ↑",
+            f"[bold white]{result['pushed']}[/bold white] task(s) pushed to Notion.\n\n"
+            f"[dim]Database ID: {result['db_id']}[/dim]",
+        )
+    except NotionError as e:
+        panel_error("Notion error", str(e)); raise typer.Exit(code=1)
+    except Exception as e:
+        print_error(f"Unexpected error: {e}"); raise typer.Exit(code=1)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# pull  (Notion sync)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@app.command()
+def pull(
+    reset_creds: bool = typer.Option(
+        False, "--reset",
+        help="Forget saved credentials and re-enter them.",
+    ),
+):
+    """Pull tasks from Notion and replace local tasks (full sync, Notion → local).
+
+    Backs up local tasks to [bold]~/.todoc/tasks_before_pull.json[/bold] first.
+    Credentials are prompted once and saved permanently, same as [bold]todoc push[/bold].
+
+    [bold]Examples[/bold]
+      todoc pull           ← sync Notion → local
+      todoc pull --reset   ← update saved credentials, then pull
+    """
+    from todoc.sync.notion import (
+        load_credentials, save_credentials, verify_api_key,
+        pull_tasks, NotionError,
+    )
+    from todoc.core.models import Task
+    from todoc.storage.repository import TaskRepository
+
+    creds = None if reset_creds else load_credentials()
+
+    if creds is None:
+        console.print()
+        panel_info(
+            "Notion credentials required",
+            "todoc will save these to [bold]~/.todoc/notion_creds.json[/bold] "
+            "for all future push / pull commands.\n\n"
+            "[dim]https://www.notion.so/my-integrations[/dim]",
+        )
+        console.print()
+        api_key = typer.prompt("  Notion Integration Token").strip()
+        if not api_key:
+            print_error("Token cannot be empty."); raise typer.Exit(code=1)
+
+        console.print("  [dim]Verifying token…[/dim]")
+        if not verify_api_key(api_key):
+            panel_error(
+                "Invalid token",
+                "Could not authenticate with Notion.\n"
+                "[dim]Check your token at https://www.notion.so/my-integrations[/dim]",
+            )
+            raise typer.Exit(code=1)
+        print_success("Token verified ✓")
+
+        console.print()
+        page_id = typer.prompt(
+            "  Notion Page ID  [dim](32-char hex from the page URL)[/dim]"
+        ).strip().replace("-", "")
+        if len(page_id) != 32:
+            panel_error(
+                "Invalid Page ID",
+                "Page ID must be 32 hex characters.\n"
+                "[dim]Copy it from: notion.so/<workspace>/<PageID>[/dim]",
+            )
+            raise typer.Exit(code=1)
+
+        save_credentials(api_key, page_id)
+        print_success("Credentials saved to ~/.todoc/notion_creds.json")
+        creds = {"api_key": api_key, "page_id": page_id}
+
+    console.print()
+    console.print("  [dim]Fetching tasks from Notion…[/dim]")
+    try:
+        rows = pull_tasks(creds["api_key"], creds["page_id"])
+    except NotionError as e:
+        panel_error("Notion error", str(e)); raise typer.Exit(code=1)
+    except Exception as e:
+        print_error(f"Unexpected error: {e}"); raise typer.Exit(code=1)
+
+    if not rows:
+        panel_info(
+            "Nothing to pull",
+            "[dim]The Notion database is empty. Try [bold]todoc push[/bold] first.[/dim]",
+        )
+        raise typer.Exit()
+
+    # Back up local tasks before overwriting
+    svc         = TodoService()
+    backup_path = Path.home() / ".todoc" / "tasks_before_pull.json"
+    try:
+        backup_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(backup_path, "w", encoding="utf-8") as f:
+            f.write(svc.export_json())
+    except Exception:
+        pass  # non-fatal
+
+    TaskRepository().save_all([Task.from_dict(r) for r in rows])
+
+    panel_success(
+        "Pull complete  ↓",
+        f"[bold white]{len(rows)}[/bold white] task(s) pulled from Notion.\n\n"
+        f"[dim]Local backup saved to {backup_path}[/dim]",
+    )
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# notion-logout
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@app.command(name="notion-logout")
+def notion_logout():
+    """Remove saved Notion credentials from this machine.
+
+    The next [bold]todoc push[/bold] or [bold]todoc pull[/bold] will prompt for credentials again.
+    """
+    from todoc.sync.notion import clear_credentials, _CREDS_FILE
+    if _CREDS_FILE.exists():
+        clear_credentials()
+        panel_warning(
+            "Credentials removed",
+            f"[dim]{_CREDS_FILE}[/dim] deleted.\n\n"
+            "Run [bold]todoc push[/bold] or [bold]todoc pull[/bold] to set new credentials.",
+        )
+    else:
+        panel_info("Nothing to remove", "[dim]No saved Notion credentials found.[/dim]")
 
 
 if __name__ == "__main__":

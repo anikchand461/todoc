@@ -434,21 +434,38 @@ def _sub(label: str) -> None:
 
 
 _IDX = [
-    ("add",    "Create a new task",         'todoc add "Fix bug" -p high --tags "#backend"'),
-    ("list",   "Show all tasks",            "todoc list --pending --by priority"),
-    ("done",   "Mark task(s) complete",     "todoc done 1   or   todoc done 1 2 5"),
-    ("undone", "Reopen a completed task",   "todoc undone 3"),
-    ("delete", "Remove a task forever",     "todoc delete 4 --force"),
-    ("edit",   "Change any field",          'todoc edit 2 -p critical --tags "urgent"'),
-    ("show",   "Full detail for one task",  "todoc show 3"),
-    ("search", "Find tasks by keyword",     'todoc search "#bug"'),
-    ("sort",   "List sorted by a field",    "todoc sort --by priority"),
-    ("stats",  "Completion statistics",     "todoc stats"),
-    ("clear",  "Remove all done tasks",     "todoc clear"),
-    ("export", "Save tasks to file",        "todoc export -o backup.json"),
-    ("import", "Load tasks from file",      "todoc import backup.json"),
-    ("reset",  "Wipe ALL tasks permanently", "todoc reset --force"),
-    ("help",   "Full command reference",    "todoc help"),
+    # ── Core task operations ──────────────────────────────────
+    ("add",           "Create a new task",              'todoc add "Fix bug" -p high --tags "#backend"'),
+    ("list",          "Show all tasks",                 "todoc list --pending --by priority"),
+    ("done",          "Mark task(s) complete",          "todoc done 1   or   todoc done 1 2 5"),
+    ("undone",        "Reopen a completed task",        "todoc undone 3"),
+    ("edit",          "Change any field",               'todoc edit 2 -p critical --tags "urgent"'),
+    ("delete",        "Remove a task forever",          "todoc delete 4 --force"),
+    # ── Viewing & search ─────────────────────────────────────
+    ("show",          "Full detail for one task",       "todoc show 3"),
+    ("search",        "Find tasks by keyword",          'todoc search "#bug" --fuzzy'),
+    ("sort",          "List sorted by a field",         "todoc sort --by priority"),
+    ("stats",         "Completion statistics",          "todoc stats"),
+    # ── Kanban & subtasks ────────────────────────────────────
+    ("board",         "Kanban board: Todo/Doing/Done",  "todoc board"),
+    ("status",        "Move task to a Kanban column",   "todoc status 3 doing"),
+    ("subtask",       "Add a subtask to a task",        'todoc subtask 1 "Write tests" -p low'),
+    # ── Interfaces ───────────────────────────────────────────
+    ("tui",           "Interactive TUI dashboard",      "todoc tui"),
+    # ── Housekeeping ─────────────────────────────────────────
+    ("clear",         "Remove all done tasks",          "todoc clear"),
+    ("reset",         "Wipe ALL tasks permanently",     "todoc reset --force"),
+    ("notify",        "Desktop alert for urgent tasks", "todoc notify"),
+    ("daemon",        "Background notification daemon", "todoc daemon start"),
+    # ── Import / Export ──────────────────────────────────────
+    ("export",        "Save tasks to file",             "todoc export -o backup.json"),
+    ("import",        "Load tasks from file",           "todoc import backup.json"),
+    # ── Notion sync ──────────────────────────────────────────
+    ("push",          "Sync local tasks → Notion",      "todoc push"),
+    ("pull",          "Sync Notion tasks → local",      "todoc pull"),
+    ("notion-logout", "Remove saved Notion credentials","todoc notion-logout"),
+    # ── Help ─────────────────────────────────────────────────
+    ("help",          "Full command reference",         "todoc help --full"),
 ]
 
 
@@ -470,7 +487,7 @@ def render_summary() -> None:
         expand       = False,
         padding      = (0, 1),
     )
-    tbl.add_column("Command",      style="bold cyan", width=10)
+    tbl.add_column("Command",      style="bold cyan", width=14)
     tbl.add_column("What it does", style="white",     width=30)
     tbl.add_column("Example",      style="dim white", ratio=1, min_width=36)
 
@@ -690,6 +707,129 @@ def render_help() -> None:
     _note("Only JSON format is supported for import.")
     _sub("Examples")
     _ex("todoc import backup.json", 'Restore from a backup')
+
+    # ══════════════════════════════════════════════════════════
+    # KANBAN & SUBTASKS
+    # ══════════════════════════════════════════════════════════
+    _h_rule("Kanban Board & Subtasks")
+
+    _cmd("🗂️", "board", "",
+         'Visualise your tasks as a three-column Kanban board: To Do | In Progress | Done.')
+    _sub("Notes")
+    _note("Use  todoc status <id> <todo|doing|done>  to move cards between columns.")
+    _sub("Examples")
+    _ex("todoc board", 'Open the full Kanban view')
+    _spacer()
+
+    _cmd("⇄", "status", "<id> <todo|doing|done>",
+         'Move a task to a specific Kanban column without opening the board.')
+    _sub("Status values")
+    console.print(f"    [bold cyan]todo    [/bold cyan][dim]Backlog / not started yet[/dim]")
+    console.print(f"    [bold cyan]doing   [/bold cyan][dim]In progress — actively being worked on[/dim]")
+    console.print(f"    [bold cyan]done    [/bold cyan][dim]Completed[/dim]")
+    _sub("Examples")
+    _ex("todoc status 3 doing",   'Start working on task #3')
+    _ex("todoc status 3 done",    'Mark task #3 as complete')
+    _ex("todoc status 3 todo",    'Move task #3 back to the backlog')
+    _spacer()
+
+    _cmd("➕", "subtask", "<parent-id> \"description\" [options]",
+         'Add a subtask nested under an existing task. Appears indented in  todoc show <id>.')
+    _sub("Flags")
+    _flag("-p / --priority", "LEVEL", "Priority of the subtask", "medium")
+    _sub("Notes")
+    _note("Run  todoc show <parent-id>  to see all subtasks under a task.")
+    _sub("Examples")
+    _ex('todoc subtask 1 "Write unit tests"',          'Add a subtask to task #1')
+    _ex('todoc subtask 1 "Update changelog" -p low',   'Subtask with low priority')
+
+    # ══════════════════════════════════════════════════════════
+    # INTERACTIVE TUI
+    # ══════════════════════════════════════════════════════════
+    _h_rule("Interactive TUI")
+
+    _cmd("🖥️", "tui", "",
+         'Launch a full interactive terminal dashboard — browse, edit, and manage tasks without typing commands.')
+    _sub("Keyboard shortcuts")
+    console.print(f"    [bold cyan]a[/bold cyan]          [dim]Add a new task[/dim]")
+    console.print(f"    [bold cyan]e[/bold cyan]          [dim]Edit selected task[/dim]")
+    console.print(f"    [bold cyan]Space[/bold cyan]      [dim]Toggle done / pending[/dim]")
+    console.print(f"    [bold cyan]n[/bold cyan]          [dim]Cycle status: todo → doing → done[/dim]")
+    console.print(f"    [bold cyan]d[/bold cyan]          [dim]Delete selected task[/dim]")
+    console.print(f"    [bold cyan]/[/bold cyan]          [dim]Focus fuzzy search bar[/dim]")
+    console.print(f"    [bold cyan]r[/bold cyan]          [dim]Refresh list[/dim]")
+    console.print(f"    [bold cyan]q[/bold cyan]          [dim]Quit[/dim]")
+    _sub("Requirements")
+    _note("Requires the  textual  package:  pip install textual")
+    _sub("Examples")
+    _ex("todoc tui", 'Launch the interactive dashboard')
+
+    # ══════════════════════════════════════════════════════════
+    # NOTIFICATIONS & DAEMON
+    # ══════════════════════════════════════════════════════════
+    _h_rule("Notifications & Daemon")
+
+    _cmd("🔔", "notify", "",
+         'Send an immediate desktop notification listing all HIGH and CRITICAL pending tasks.')
+    _sub("Platform support")
+    _note("macOS — native Notification Center")
+    _note("Linux — notify-send  (install  libnotify-bin  if missing)")
+    _note("Windows — plyer  (pip install plyer)")
+    _sub("Examples")
+    _ex("todoc notify",                          'Fire a notification right now')
+    _ex("*/30 * * * * todoc notify",             'Crontab entry for alerts every 30 min')
+    _spacer()
+
+    _cmd("⚙️", "daemon", "<start|stop|status|run>",
+         'Manage the background notification daemon. Sends desktop alerts at 4h, 6h, 9h, 12h, 18h, 24h for pending tasks.')
+    _sub("Actions")
+    console.print(f"    [bold cyan]start   [/bold cyan][dim]Install and start the daemon[/dim]")
+    console.print(f"    [bold cyan]stop    [/bold cyan][dim]Uninstall the daemon[/dim]")
+    console.print(f"    [bold cyan]status  [/bold cyan][dim]Check whether the daemon is currently running[/dim]")
+    console.print(f"    [bold cyan]run     [/bold cyan][dim]Run a single notification check right now (used internally)[/dim]")
+    _sub("Platform support")
+    _note("macOS → launchd   |   Linux → systemd user timer (cron fallback)   |   Windows → Task Scheduler")
+    _sub("Examples")
+    _ex("todoc daemon start",  'Install and start the background daemon')
+    _ex("todoc daemon stop",   'Remove the daemon entirely')
+    _ex("todoc daemon status", 'See if it is currently running')
+
+    # ══════════════════════════════════════════════════════════
+    # NOTION SYNC
+    # ══════════════════════════════════════════════════════════
+    _h_rule("Notion Sync")
+
+    _cmd("↑", "push", "[--reset]",
+         'Upload all local tasks to Notion (local → Notion, full sync). Credentials are saved on first run.')
+    _sub("Flags")
+    _flag("--reset", "flag", "Forget saved credentials and re-enter them")
+    _sub("First-time setup")
+    _note("1. Create an integration at  https://www.notion.so/my-integrations")
+    _note("2. Copy the Internal Integration Token")
+    _note("3. Share your target Notion page with the integration")
+    _note("4. Copy the 32-char Page ID from the page URL")
+    _note("Credentials are saved to  ~/.todoc/notion_creds.json  for all future syncs.")
+    _sub("Examples")
+    _ex("todoc push",          'Sync local tasks to Notion')
+    _ex("todoc push --reset",  'Update saved credentials, then sync')
+    _spacer()
+
+    _cmd("↓", "pull", "[--reset]",
+         'Download tasks from Notion and replace local tasks (Notion → local, full sync). Auto-backs up local tasks first.')
+    _sub("Flags")
+    _flag("--reset", "flag", "Forget saved credentials and re-enter them")
+    _sub("Notes")
+    _note("Local tasks are backed up to  ~/.todoc/tasks_before_pull.json  before overwriting.")
+    _note("Credentials are shared with  todoc push — set up once, works for both.")
+    _sub("Examples")
+    _ex("todoc pull",          'Sync Notion tasks to local')
+    _ex("todoc pull --reset",  'Update saved credentials, then pull')
+    _spacer()
+
+    _cmd("🔓", "notion-logout", "",
+         'Delete saved Notion credentials from this machine. The next push or pull will prompt again.')
+    _sub("Examples")
+    _ex("todoc notion-logout", 'Remove stored Notion credentials')
 
     # ── Footer ─────────────────────────────────────────────────
     _spacer()

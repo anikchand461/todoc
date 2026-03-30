@@ -1292,8 +1292,7 @@
         <p class="hero-desc">
           Fast, beautiful, and built entirely in your shell.
           <strong
-            >TUI dashboard, Kanban board, fuzzy search, auto
-            notifications.</strong
+            >TUI dashboard, Kanban board, fuzzy search, Notion integration.</strong
           >
           No apps. No accounts.
         </p>
@@ -1421,7 +1420,7 @@
 
     <div class="stats-bar reveal">
       <div class="sc">
-        <div class="sn"><em>21</em></div>
+        <div class="sn"><em>24</em></div>
         <div class="sl">commands available</div>
       </div>
       <div class="sc">
@@ -1461,6 +1460,8 @@
             <div class="dtab" onclick="st('notify', this)">🔔 notify</div>
             <div class="dtab" onclick="st('daemon', this)">⚙ daemon</div>
             <div class="dtab" onclick="st('export', this)">📤 export</div>
+            <div class="dtab" onclick="st('push', this)">↑ push</div>
+            <div class="dtab" onclick="st('pull', this)">↓ pull</div>
           </div>
           <div class="dpane">
             <div class="scene on" id="sc-list">
@@ -2039,12 +2040,57 @@
                 opens directly in Excel / Google Sheets
               </div>
             </div>
+
+            <div class="scene" id="sc-push">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc">todoc push</span>
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">Connecting to Notion…</div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">✓ Push complete ↑</div>
+                <div class="pr">
+                  <span class="pv">8 task(s) pushed to Notion.</span>
+                </div>
+                <div class="pr">
+                  <span style="color: #2e4040; font-size: 11px">Database ID: abc123def456…</span>
+                </div>
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">
+                Credentials saved to ~/.todoc/notion_creds.json<br />
+                Run <span style="color:#4ab8b8">todoc push --reset</span> to update credentials.
+              </div>
+            </div>
+
+            <div class="scene" id="sc-pull">
+              <div>
+                <span class="tp">$</span>
+                <span class="tc">todoc pull</span>
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">Fetching tasks from Notion…</div>
+              <br />
+              <div class="pan ok">
+                <div class="pt">✓ Pull complete ↓</div>
+                <div class="pr">
+                  <span class="pv">8 task(s) pulled from Notion.</span>
+                </div>
+                <div class="pr">
+                  <span style="color: #2e4040; font-size: 11px">Local backup → ~/.todoc/tasks_before_pull.json</span>
+                </div>
+              </div>
+              <br />
+              <div style="color: #2e4040; font-size: 12px">
+                Local tasks replaced. Run <span style="color:#4ab8b8">todoc list</span> to verify.
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
-
-    <section id="features" class="sec">
       <div class="wrap">
         <div class="reveal">
           <div class="eyebrow">why todoc</div>
@@ -2102,6 +2148,15 @@
               Install and go. Everything stored in
               <code>~/.todoc/tasks.json</code>. No accounts, no cloud, no setup.
               Export to JSON or CSV anytime.
+            </p>
+          </div>
+          <div class="fc reveal" style="transition-delay: 0.3s">
+            <div class="fn">07</div>
+            <div class="ft">Notion Sync</div>
+            <p class="fd">
+              Push your tasks to Notion with <code>todoc push</code> and pull
+              them back with <code>todoc pull</code>. Credentials saved once,
+              works forever. Auto-backup before every pull.
             </p>
           </div>
         </div>
@@ -2260,6 +2315,21 @@
                 ><span class="cd"
                   >Full per-command reference with examples</span
                 >
+              </div>
+            </div>
+            <div style="margin-top: 32px">
+              <div class="cg-lbl">Notion Sync</div>
+              <div class="crow">
+                <span class="cn">push</span
+                ><span class="cd">Sync local tasks → Notion (full upload)</span>
+              </div>
+              <div class="crow">
+                <span class="cn">pull</span
+                ><span class="cd">Sync Notion → local (auto-backup first)</span>
+              </div>
+              <div class="crow">
+                <span class="cn">notion-logout</span
+                ><span class="cd">Remove saved Notion credentials</span>
               </div>
             </div>
           </div>

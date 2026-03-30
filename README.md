@@ -68,29 +68,32 @@ todoc -s           # compact command summary
 
 ## All Commands
 
-| Command   | What it does                                   |
-| --------- | ---------------------------------------------- |
-| `add`     | Create a new task                              |
-| `list`    | Show all tasks (done + pending)                |
-| `done`    | Mark one or more tasks complete                |
-| `undone`  | Reopen a completed task                        |
-| `delete`  | Remove a task permanently                      |
-| `edit`    | Change any field of a task                     |
-| `show`    | Full detail for one task (includes subtasks)   |
-| `search`  | Full-text search — supports `--fuzzy` matching |
-| `sort`    | Display list sorted by a field                 |
-| `stats`   | Beautiful statistics dashboard                 |
-| `clear`   | Remove all completed tasks                     |
-| `reset`   | ⚠️ Wipe ALL tasks permanently                  |
-| `export`  | Save tasks to JSON or CSV                      |
-| `import`  | Load tasks from a JSON backup                  |
-| `subtask` | Add a subtask under an existing task           |
-| `status`  | Move a task between Kanban columns             |
-| `board`   | Kanban board — To Do / In Progress / Done      |
-| `tui`     | Interactive TUI dashboard (keyboard-driven)    |
-| `notify`  | Send desktop notification for urgent tasks     |
-| `daemon`  | Background auto-notification scheduler         |
-| `help`    | Full command reference                         |
+| Command         | What it does                                   |
+| --------------- | ---------------------------------------------- |
+| `add`           | Create a new task                              |
+| `list`          | Show all tasks (done + pending)                |
+| `done`          | Mark one or more tasks complete                |
+| `undone`        | Reopen a completed task                        |
+| `delete`        | Remove a task permanently                      |
+| `edit`          | Change any field of a task                     |
+| `show`          | Full detail for one task (includes subtasks)   |
+| `search`        | Full-text search — supports `--fuzzy` matching |
+| `sort`          | Display list sorted by a field                 |
+| `stats`         | Beautiful statistics dashboard                 |
+| `clear`         | Remove all completed tasks                     |
+| `reset`         | ⚠️ Wipe ALL tasks permanently                  |
+| `export`        | Save tasks to JSON or CSV                      |
+| `import`        | Load tasks from a JSON backup                  |
+| `subtask`       | Add a subtask under an existing task           |
+| `status`        | Move a task between Kanban columns             |
+| `board`         | Kanban board — To Do / In Progress / Done      |
+| `tui`           | Interactive TUI dashboard (keyboard-driven)    |
+| `notify`        | Send desktop notification for urgent tasks     |
+| `daemon`        | Background auto-notification scheduler         |
+| `push`          | Sync local tasks → Notion                      |
+| `pull`          | Sync Notion tasks → local                      |
+| `notion-logout` | Remove saved Notion credentials                |
+| `help`          | Full command reference                         |
 
 ---
 
@@ -235,6 +238,35 @@ Logs: `~/.todoc/daemon.log`
 
 ---
 
+## Notion Sync
+
+Sync your tasks to a Notion page with `todoc push` and pull them back with `todoc pull`. Credentials are saved once and reused forever.
+
+### Setup (one time)
+
+1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations) → **New integration** → name it `todoc` → copy the **Internal Integration Token**
+2. Open the Notion page you want to sync to → **"..." menu** → **Connect to** → select `todoc`
+3. Copy the **Page ID** from the URL:
+   ```
+   notion.so/My-Page-abc123def456abc123def456abc12345
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 32 chars
+   ```
+
+### Usage
+
+```bash
+todoc push                 # sync local tasks → Notion
+todoc pull                 # sync Notion tasks → local (backs up first)
+todoc push --reset         # update saved credentials, then push
+todoc notion-logout        # remove saved credentials
+```
+
+> **Note:** `todoc pull` automatically backs up your local tasks to `~/.todoc/tasks_before_pull.json` before overwriting.
+
+Credentials are stored at `~/.todoc/notion_creds.json`.
+
+---
+
 ## Help
 
 ```bash
@@ -250,11 +282,13 @@ todoc <command> --help  # flag list for any single command
 ```
 ~/.todoc/
 ├── tasks.json
+├── notion_creds.json       # saved after first todoc push / pull
+├── tasks_before_pull.json  # auto-backup created before todoc pull
 ├── daemon.log
 └── daemon-error.log
 ```
 
-No accounts, no sync, no cloud.
+No accounts required for local use. Notion sync is opt-in.
 
 ---
 
@@ -277,8 +311,10 @@ todoc/
     ├── core/
     │   ├── models.py      # Task dataclass
     │   └── service.py     # business logic + fuzzy search
-    └── storage/
-        └── repository.py  # JSON read/write
+    ├── storage/
+    │   └── repository.py  # JSON read/write
+    └── sync/
+        └── notion.py      # Notion API integration (push / pull)
 ```
 
 ---
